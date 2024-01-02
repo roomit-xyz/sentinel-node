@@ -40,19 +40,9 @@ function format:color(){
     WHITE='\033[1;37m'
 }
 
-# Fucntion to detect Debian 
-detect_debian() {
-    if [ -r /etc/os-release ]; then
-        source /etc/os-release
-        if [[ "$ID" == "debian" || "$ID_LIKE" == *"debian"* ]]; then
-            return 0  # Debian detected
-        fi
-    fi
-    return 1  # Debian not detected
-}
 
 # Function to detect Ubuntu version
-detect_ubuntu() {
+detect:ubuntu() {
     version=$(lsb_release -rs)
     if [[ "$version" == "20."* || "$version" == "21."* || "$version" == "22."* || "$version" == "23."* ]]; then
         return 0  # Ubuntu 18 to 23 detected
@@ -62,7 +52,7 @@ detect_ubuntu() {
 }
 
 # Function to detect Fedora and Rocky Linux
-detect_fedora_rocky() {
+detect:fedora:rocky() {
     if [[ -f "/etc/fedora-release" || -f "/etc/rocky-release" ]]; then
         return 0  # Fedora or Rocky Linux detected
     else
@@ -70,50 +60,8 @@ detect_fedora_rocky() {
     fi
 }
 
-detect_arch() {
-    if detect_debian; then
-        arch=$(dpkg --print-architecture)
-        echo "Debian detected"
-        echo "Architecture: $arch"
-        return 0
-    elif detect_ubuntu; then
-        if [[ $(arch) == "arm"* ]]; then
-            echo "Ubuntu Raspberry Pi architecture detected"
-            return 0
-        elif [[ $(arch) == "x86_64" ]]; then
-            echo "Ubuntu x64 architecture detected"
-            return 0
-        else
-            echo "Unknown architecture"
-        fi
-    elif detect_fedora_rocky; then
-        arch=$(uname -m)
-        echo "Fedora or Rocky Linux detected"
-        echo "Architecture: $arch"
-        return 0
-    else
-        echo "Not running Debian, Ubuntu 18 to 23, Fedora, or Rocky Linux"
-        return 1
-    fi
-}
 
-
-function tools:depedency(){
-sudo apt-get update
-sudo apt-get install ca-certificates curl gnupg
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/raspbian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
-# Set up Docker's APT repository:
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/raspbian \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
-
-
-    if detect_arch; then
+depedency:ubuntu(){
         apt-get update
         apt-get install -y jq telegraf curl ca-certificates curl gnupg  lsb-release -y
         mkdir -p /etc/apt/keyrings
@@ -133,12 +81,61 @@ sudo apt-get update
          fi
          apt-get update -y
          apt-get install telegraf acl htop wget tcpdump jq python3-pip lsof qrencode wireguard-tools bind9-dnsutils telnet unzip docker-compose zsh docker-ce docker-ce-cli containerd.io docker-compose-plugin git ufw -y
-    elif detect_fedora_rocky; then
-        echo "Detected Fedora or Rocky Linux. Installing jq and telegraf..."
-        dnf -y install dnf-plugins-core
-        dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
-        dnf install -y jq telegraf curl docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin firewalld telnet unzip lsof acl
+}
+
+
+depedency:raspbian(){
+         sudo apt-get update
+         sudo apt-get install ca-certificates curl gnupg
+         sudo install -m 0755 -d /etc/apt/keyrings
+         curl -fsSL https://download.docker.com/linux/raspbian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+         sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+         # Set up Docker's APT repository:
+         echo \
+         "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/raspbian \
+         $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+         sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+         sudo apt-get update
+}
+
+depedency:fedora:rocky(){
+         echo "Detected Fedora or Rocky Linux. Installing jq and telegraf..."
+         dnf -y install dnf-plugins-core
+         dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+         dnf install -y jq telegraf curl docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin firewalld telnet unzip lsof acl
+}
+
+detect_arch() {
+    if detect:ubuntu; then
+        if [[ $(arch) == "arm"* ]]; then
+            echo "Ubuntu Raspberry Pi architecture detected"
+            depedency:raspbian;
+        elif [[ $(arch) == "x86_64" ]]; then
+            echo "Ubuntu x64 architecture detected"
+            depedency:ubuntu;
+        else
+            echo "Unknown architecture"
+        fi
+    elif detect:fedora:rocky; then
+            arch=$(uname -m)
+            echo "Fedora or Rocky Linux detected"
+            echo "Architecture: $arch"
+            depedency:fedora:rocky;
     else
+        echo "Not running Debian, Ubuntu 18 to 23, Fedora, or Rocky Linux"
+        return 1
+    fi
+}
+
+
+function tools:depedency(){
+
+
+
+    if detect_arch; then
+ elif detect_fedora_rocky; then
+  else
         echo "Unsupported or unrecognized operating system."
         exit 1
     fi
