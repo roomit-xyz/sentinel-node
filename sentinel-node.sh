@@ -18,6 +18,8 @@ WALLET_IMPORT_ENABLE="false"
 
 
 
+KIND=$1
+INSTRUCTION=$2
 
 function format:color(){
     NOCOLOR='\033[0m'
@@ -204,19 +206,57 @@ then
 fi
 }
 
+function help(){
+    clear;
+    echo ""
+    echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   SENTINEL NODE HELPER  \e[0m"
+    echo -e "${GREEN}Installation${NOCOLOR}"
+    echo -e "sentinel-node.sh [options] [instruction]"
+    echo -e "sentinel-node.sh [wireguard|v2ray] [install|remove]"
+    echo -e "Example Deploy Wireguard"
+    echo -e "bash sentinel-node.sh wireguard install"
+    echo ""
+    echo -e "Example remove Wireguard"
+    echo -e "bash sentinel-node.sh wireguard remove"
+}
+
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     echo "Aborting: run as root user!"
     exit 1
 fi
 
 
+
 IP_PUBLIC=$(ip addr show $(ip route get 8.8.8.8 | grep -oP '(?<=dev )(\S+)') | grep inet | grep -v inet6 | awk '{print $2}' | awk -F"/" '{print $1}')
-format:color;
-tools:depedency;
-create:user;
-setup:dvpn;
-setup:certificates;
-setup:config;
-wallet:creation;
-run:wireguard;
-get:informations;
+case "${KIND}" in
+ wireguard|wg)
+    case "${INSTRUCTION}" in
+    install)
+       format:color;
+       tools:depedency;
+       create:user;
+       setup:dvpn;
+       setup:certificates;
+       setup:config;
+       wallet:creation;
+       run:wireguard;
+       get:informations;
+       ;;
+    remove)
+       echo "remove node"
+       ;;
+    *)
+       help;
+       ;;
+    esac
+ ;;
+ v2ray|v2)
+    echo "On Testing"
+ ;;
+ *)
+    help;
+ ;;
+esac
+
+
+

@@ -1,7 +1,7 @@
 # AUTOMATE INSTALL DVPN NODE
 
 
-Scope
+### SCOPE
 
 ```
 1 vCPU
