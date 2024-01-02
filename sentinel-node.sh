@@ -101,6 +101,8 @@ chown root:root ${HOME_NODE}/.sentinelnode
 
 
 function setup:config(){
+    IP_PUBLIC=$(ip addr show $(ip route get 8.8.8.8 | grep -oP '(?<=dev )(\S+)') | grep inet | grep -v inet6 | awk '{print $2}' | awk -F"/" '{print $1}')
+    
     # Change Keyring to test
     echo "Change Keyring to test"
     sed -i 's/backend = "[^"]*"/backend = "test"/' ${HOME_NODE}/.sentinelnode/config.toml
@@ -227,7 +229,7 @@ fi
 
 
 
-IP_PUBLIC=$(ip addr show $(ip route get 8.8.8.8 | grep -oP '(?<=dev )(\S+)') | grep inet | grep -v inet6 | awk '{print $2}' | awk -F"/" '{print $1}')
+
 case "${KIND}" in
  wireguard|wg)
     case "${INSTRUCTION}" in
