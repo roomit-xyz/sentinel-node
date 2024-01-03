@@ -177,8 +177,8 @@ function get:ip_public(){
 
     if [[ "$IP_PRIVATE" == "true" ]]; then
         echo "Private IP address detected: $IP_PRIVATE"
-    else
         IP_PUBLIC=$(curl -s https://ifconfig.me)
+    else
         echo "Public IP address: $IP_PUBLIC"
     fi
 }
