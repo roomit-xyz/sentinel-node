@@ -18,7 +18,7 @@ For Temporary Only support
 - *Wireguard and x86_64 Ubuntu 22.04*
 - *v2ray and x86_64 Ubuntu 22.04*
 
-1 machine = 2 service Sentinel DVPN
+1 machine able running 2 service Sentinel DVPN (v2ray and wireguard)
 
 ### INSTALLATION
 
