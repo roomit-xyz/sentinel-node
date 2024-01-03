@@ -311,7 +311,7 @@ then
         --name sentinel-v2ray \
         --restart unless-stopped \
         --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
-        --publish 7777:7777/tcp \
+        --publish 7776:7776/tcp \
         --publish '${GET_PORT_V2RAY}':'${GET_PORT_V2RAY}'/tcp \
         sentinel-dvpn-node process start'
 else
@@ -355,6 +355,16 @@ function get:informations(){
         echo -e "${GREEN}Your Node Address :${NOCOLOR} ${RED}${NODE_ADDRESS}${NOCOLOR}"
         echo -e "${GREEN}Your Wallet Address :${NOCOLOR} ${RED}${NODE_ADDRESS}${NOCOLOR}"
         echo -e "${GREEN}Your Wallet Address :${NOCOLOR} ${RED}${WALLET_NAME}${NOCOLOR}"
+        echo -e "${GREEN}Your User           :${NOCOLOR} ${RED}${USER_SENTINEL}${NOCOLOR}"
+        echo -e "${GREEN}Your Config Path    :${NOCOLOR} ${RED}${HOME_NODE}/.sentinel${NOCOLOR}"
+        if [ ${KIND} == "wireguard" ]
+        then
+        echo -e "${GREEN}Your EndPoint Node  :${NOCOLOR} ${RED}https:\/\/'"${IP_PUBLIC}"':7777${NOCOLOR}"
+        echo -e "${GREEN}Your Port Wireguard :${NOCOLOR} ${RED}${GET_PORT_WIREGUARD}${NOCOLOR}"
+        else
+        echo -e "${GREEN}Your EndPoint Node  :${NOCOLOR} ${RED}https:\/\/'"${IP_PUBLIC}"':7776${NOCOLOR}"
+        echo -e "${GREEN}Your Port Wireguard :${NOCOLOR} ${RED}${GET_PORT_V2RAY}${NOCOLOR}"
+        fi
         echo ""
         echo "Please send 50 dVPN for activation to your wallet ${WALLET_ADDRESS}"
         echo -e "restart service after sent balance with  command ${GREEN}docker restart sentinel-wireguard${NOCOLOR}"
