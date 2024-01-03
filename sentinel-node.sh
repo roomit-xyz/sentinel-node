@@ -35,22 +35,22 @@ function format:color(){
 }
 
 
-# Function to detect Ubuntu version
+
 function detect:ubuntu() {
     version=$(lsb_release -rs)
     if [[ "$version" == "20."* || "$version" == "21."* || "$version" == "22."* || "$version" == "23."* ]]; then
-        return 0  # Ubuntu 18 to 23 detected
+        return 0  
     else
-        return 1  # Ubuntu version not detected
+        return 1  
     fi
 }
 
-# Function to detect Fedora and Rocky Linux
+
 function detect:fedora:rocky() {
     if [[ -f "/etc/fedora-release" || -f "/etc/rocky-release" ]]; then
-        return 0  # Fedora or Rocky Linux detected
+        return 0  
     else
-        return 1  # Fedora or Rocky Linux not detected
+        return 1 
     fi
 }
 
@@ -85,7 +85,6 @@ function depedency:raspbian(){
          curl -fsSL https://download.docker.com/linux/raspbian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
          sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
-         # Set up Docker's APT repository:
          echo \
          "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/raspbian \
          $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
@@ -115,15 +114,26 @@ function setup:dvpn(){
     sudo -u ${USER} bash -c 'docker run --rm \
                                         --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
                                         sentinel-dvpn-node process config init'
-    sudo -u ${USER} bash -c 'docker run --rm \
-                                        --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
-                                        sentinel-dvpn-node process wireguard config init'
     [ -f ${HOME_NODE}/.sentinelnode/config.toml ] && echo "File Config Found" || echo "File Config Not Found" | exit 1;
+    if [ "${KIND}" == "wireguard" ]
+    then
+      sudo -u ${USER} bash -c 'docker run --rm \
+                                          --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
+                                          sentinel-dvpn-node process wireguard config init'
+      [ -f ${HOME_NODE}/.sentinelnode/wireguard.toml ] && echo "File Config Found" || echo "File Config Not Found" | exit 1;
+    else
+      sudo -u ${USER} bash -c 'docker run --rm \
+                                          --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
+                                          sentinel-dvpn-node process v2ray config init'                                  
+      [ -f ${HOME_NODE}/.sentinelnode/v2ray.toml ] && echo "File Config Found" || echo "File Config Not Found" | exit 1;
+    fi
+    
 }
 
 function attach() {
     if detect:ubuntu; then
         if [[ $(arch) == "arm"* ]]; then
+            ARCH="arm"
             echo "Ubuntu Raspberry Pi architecture detected"
             depedency:raspbian;
             images:dvpn:arm;
@@ -199,67 +209,80 @@ function setup:certificates(){
 
 function setup:config(){
     get:ip_public;
-    # Change Keyring to test
+   
     echo "Change Keyring to test"
     sed -i 's/backend = "[^"]*"/backend = "test"/' ${HOME_NODE}/.sentinelnode/config.toml
 
-    # Change RPC
+  
     echo "Change RPC"
     sed -i 's/rpc_addresses = "[^"]*"/rpc_addresses = "https:\/\/rpc.dvpn.roomit.xyz:443"/' ${HOME_NODE}/.sentinelnode/config.toml
 
-    # Change RPC Timeout
+ 
     echo "Change RPC Timeout"
     sed -i 's/rpc_query_timeout = [0-9]*/rpc_query_timeout = 15/' ${HOME_NODE}/.sentinelnode/config.toml
     
-    # Change IP Public
+ 
     echo "Change IP Public | ${IP_PUBLIC}"
     sed -i 's/ipv4_address = "[^"]*"/ipv4_address = "'${IP_PUBLIC}'"/' ${HOME_NODE}/.sentinelnode/config.toml
 
-    # Change API
+
     echo "Change API"
     sed -i 's/listen_on = "[^"]*"/listen_on = "0.0.0.0:7777"/' ${HOME_NODE}/.sentinelnode/config.toml
 
-    # Change Remote URL
+   
     echo "Change Remote URL"
     sed -i 's/remote_url = "[^"]*"/remote_url = "https:\/\/'"${IP_PUBLIC}"':7777"/' ${HOME_NODE}/.sentinelnode/config.toml
 
-    # Set Moniker Node
+ 
     echo "Set Moniker Node | ${MONIKER}"
     sed -i 's/moniker = "[^"]*"/moniker = "'"${MONIKER}"'"/' ${HOME_NODE}/.sentinelnode/config.toml
 
-    # Update GAS
     echo "Update GAS"
     sed -i -e 's|^gigabyte_prices *=.*|gigabyte_prices = "52573ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,9204ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1180852ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,122740ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,15342624udvpn"|'  ${HOME_NODE}/.sentinelnode/config.toml 
     sed -i -e 's|^hourly_prices *=.*|hourly_prices = "18480ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,770ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1871892ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,18897ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,13557200udvpn"|' ${HOME_NODE}/.sentinelnode/config.toml
     
-    # Update RPC
+
     echo "Update RPC"
     sed -i -e 's|^gigabyte_prices *=.*|gigabyte_prices = "52573ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,9204ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1180852ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,122740ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,15342624udvpn"|'  ${HOME_NODE}/.sentinelnode/config.toml 
     
-    # Change User Permissions
+
     setfacl -m u:${USER}:rwx -R ${HOME_NODE}/.sentinelnode
 
 }
 
-function run:wireguard(){
+function run:container(){
 GET_PORT_WIREGUARD=$(cat ${HOME_NODE}/.sentinelnode/wireguard.toml  | grep listen_port | awk -F"=" '{print $2}' | sed "s/ //")
-sudo -u ${USER} bash -c 'docker run -d \
-    --name sentinel-wireguard \
-    --restart unless-stopped \
-    --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
-    --volume /lib/modules:/lib/modules \
-    --cap-drop ALL \
-    --cap-add NET_ADMIN \
-    --cap-add NET_BIND_SERVICE \
-    --cap-add NET_RAW \
-    --cap-add SYS_MODULE \
-    --sysctl net.ipv4.ip_forward=1 \
-    --sysctl net.ipv6.conf.all.disable_ipv6=0 \
-    --sysctl net.ipv6.conf.all.forwarding=1 \
-    --sysctl net.ipv6.conf.default.forwarding=1 \
-    --publish '${GET_PORT_WIREGUARD}':'${GET_PORT_WIREGUARD}'/udp \
-    --publish 7777:7777/tcp \
-    sentinel-dvpn-node process start'
+GET_PORT_V2RAY=$(cat ${HOME_NODE}/.sentinelnode/v2ray.toml  | grep listen_port | awk -F"=" '{print $2}' | sed "s/ //")
+if [ "${KIND}" == "wireguard" ]
+then
+    sudo -u ${USER} bash -c 'docker run -d \
+        --name sentinel-wireguard \
+        --restart unless-stopped \
+        --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
+        --volume /lib/modules:/lib/modules \
+        --cap-drop ALL \
+        --cap-add NET_ADMIN \
+        --cap-add NET_BIND_SERVICE \
+        --cap-add NET_RAW \
+        --cap-add SYS_MODULE \
+        --sysctl net.ipv4.ip_forward=1 \
+        --sysctl net.ipv6.conf.all.disable_ipv6=0 \
+        --sysctl net.ipv6.conf.all.forwarding=1 \
+        --sysctl net.ipv6.conf.default.forwarding=1 \
+        --publish '${GET_PORT_WIREGUARD}':'${GET_PORT_WIREGUARD}'/udp \
+        --publish 7777:7777/tcp \
+        sentinel-dvpn-node process start'
+elif [ "${KIND}" == "v2ray" ]
+then
+    sudo -u ${USER} bash -c 'docker run -d \
+        --restart unless-stopped \
+        --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
+        -publish 7777:7777/tcp \
+        --publish '${GET_PORT_V2RAY}':'${GET_PORT_V2RAY}'/tcp \
+        sentinel-dvpn-node process start'
+else
+   echo spawner
+fi
 }
 
 
@@ -282,7 +305,7 @@ function wallet:creation(){
 
 
 function get:informations(){
-    if [ "${WALLET_IMPORT_ENABLE}" == "false" ]
+    if [ "${WALLET_IMPORT_ENABLE}" == "false" ] || [ "${WALLET_IMPORT_ENABLE}" == "False" ] || [ "${WALLET_IMPORT_ENABLE}" == "FALSE" ]
     then
         clear;
         echo ""
@@ -328,6 +351,43 @@ function ask:config(){
     WALLET_IMPORT_ENABLE=${WALLET_IMPORT_ENABLE_INPUT:-"false"}
 }
 
+
+function remove:sentinel(){
+    read -p "We Assume You Have a Backup! Type everthing for continue " REMOVE_SENTINEL
+    if [ "${KIND}" == "wireguard" ]
+    then
+       docker stop sentinel-wireguard
+       docker rm sentinel-wireguard
+    fi
+    if [ "${KIND}" == "v2ray" ]
+    then
+       docker stop sentinel-v2ray
+       docker rm sentinel-v2ray
+    fi
+    if [ "${KIND}" == "spawner" ]
+    then
+       docker stop sentinel-spawner
+       docker rm sentinel-spawner
+    fi
+    rm -rf ${HOME_NODE}/.sentinelnode
+    userdel ${USER}
+    rm -rf ${HOME_STAGE}/${USER}
+    echo -e "${RED}Remove Sentinel Successfully${NOCOLOR}"
+}
+
+
+function deploy(){
+       ask:config;
+       attach;
+       create:user;
+       setup:dvpn;
+       setup:certificates;
+       setup:config;
+       wallet:creation;
+       run:container;
+       get:informations;
+}
+
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     echo "Aborting: run as root user!"
     exit 1
@@ -339,18 +399,10 @@ case "${KIND}" in
  wireguard|wg)
     case "${INSTRUCTION}" in
     install)
-       ask:config;
-       attach;
-       create:user;
-       setup:dvpn;
-       setup:certificates;
-       setup:config;
-       wallet:creation;
-       run:wireguard;
-       get:informations;
+       deploy;
        ;;
     remove)
-       echo "Ups Sorry, under testing"
+       remove:sentinel;
        ;;
     *)
        help;
@@ -359,6 +411,17 @@ case "${KIND}" in
  ;;
  v2ray)
     echo "Ups Sorry, under testing"
+    case "${INSTRUCTION}" in
+    install)
+       deploy;
+       ;;
+    remove)
+       remove:sentinel;
+       ;;
+    *)
+       help;
+       ;;
+    esac
  ;;
 spawner)
     echo "Ups Sorry, under testing"
