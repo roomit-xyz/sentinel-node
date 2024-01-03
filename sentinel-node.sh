@@ -342,7 +342,8 @@ function wallet:creation(){
 function get:informations(){
     if [ "${WALLET_IMPORT_ENABLE}" == "false" ] || [ "${WALLET_IMPORT_ENABLE}" == "False" ] || [ "${WALLET_IMPORT_ENABLE}" == "FALSE" ]
     then
-        # clear;
+        clear;
+        format:color;
         echo ""
         echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   SENTINEL NODE INFORMATIONS  \e[0m"
         echo "Save your Seeds and Dont Lose, Your seed is your asset"
@@ -353,7 +354,7 @@ function get:informations(){
         NODE_ADDRESS=$( cat /tmp/wallet.txt | grep operator | awk '{print $2}')
         WALLET_ADDRESS=$( cat /tmp/wallet.txt | grep operator | awk '{print $3}')
         WALLET_NAME=$( cat /tmp/wallet.txt | grep operator | awk '{print $1}')
-        echo -e "${GREEN}Your Node Address :${NOCOLOR} ${RED}${NODE_ADDRESS}${NOCOLOR}"
+        echo -e "${GREEN}Your Node Address   :${NOCOLOR} ${RED}${NODE_ADDRESS}${NOCOLOR}"
         echo -e "${GREEN}Your Wallet Address :${NOCOLOR} ${RED}${NODE_ADDRESS}${NOCOLOR}"
         echo -e "${GREEN}Your Wallet Address :${NOCOLOR} ${RED}${WALLET_NAME}${NOCOLOR}"
         echo -e "${GREEN}Your User           :${NOCOLOR} ${RED}${USER_SENTINEL}${NOCOLOR}"
