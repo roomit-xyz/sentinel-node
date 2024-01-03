@@ -12,12 +12,6 @@ USER="sentinel"
 HOME_STAGE="/app/mainnet"
 HOME_NODE="${HOME_STAGE}/${USER}"
 
-######## NODE ENVIRONMENT ####
-MONIKER="SAMPURASUN NODE DVPN"
-WALLET_IMPORT_ENABLE="false"
-
-
-
 KIND=$1
 INSTRUCTION=$2
 
@@ -42,7 +36,7 @@ function format:color(){
 
 
 # Function to detect Ubuntu version
-detect:ubuntu() {
+function detect:ubuntu() {
     version=$(lsb_release -rs)
     if [[ "$version" == "20."* || "$version" == "21."* || "$version" == "22."* || "$version" == "23."* ]]; then
         return 0  # Ubuntu 18 to 23 detected
@@ -52,7 +46,7 @@ detect:ubuntu() {
 }
 
 # Function to detect Fedora and Rocky Linux
-detect:fedora:rocky() {
+function detect:fedora:rocky() {
     if [[ -f "/etc/fedora-release" || -f "/etc/rocky-release" ]]; then
         return 0  # Fedora or Rocky Linux detected
     else
@@ -61,7 +55,7 @@ detect:fedora:rocky() {
 }
 
 
-depedency:ubuntu(){
+function depedency:ubuntu(){
         apt-get update
         apt-get install -y jq telegraf curl ca-certificates curl gnupg  lsb-release -y
         mkdir -p /etc/apt/keyrings
@@ -84,7 +78,7 @@ depedency:ubuntu(){
 }
 
 
-depedency:raspbian(){
+function depedency:raspbian(){
          sudo apt-get update
          sudo apt-get install ca-certificates curl gnupg
          sudo install -m 0755 -d /etc/apt/keyrings
@@ -99,29 +93,54 @@ depedency:raspbian(){
          sudo apt-get update
 }
 
-depedency:fedora:rocky(){
+function depedency:fedora:rocky(){
          echo "Detected Fedora or Rocky Linux. Installing jq and telegraf..."
          dnf -y install dnf-plugins-core
          dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
          dnf install -y jq telegraf curl docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin firewalld telnet unzip lsof acl
 }
 
-detect_arch() {
+
+function images:dvpn:x86(){
+    sudo -u ${USER} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:latest'
+    sudo -u ${USER} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:latest sentinel-dvpn-node'
+}
+
+function images:dvpn:arm(){
+    sudo -u ${USER} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:0.7.0'
+    sudo -u ${USER} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:0.7.0 sentinel-dvpn-node'
+}
+
+function setup:dvpn(){
+    sudo -u ${USER} bash -c 'docker run --rm \
+                                        --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
+                                        sentinel-dvpn-node process config init'
+    sudo -u ${USER} bash -c 'docker run --rm \
+                                        --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
+                                        sentinel-dvpn-node process wireguard config init'
+    [ -f ${HOME_NODE}/.sentinelnode/config.toml ] && echo "File Config Found" || echo "File Config Not Found" | exit 1;
+}
+
+function attach() {
     if detect:ubuntu; then
         if [[ $(arch) == "arm"* ]]; then
             echo "Ubuntu Raspberry Pi architecture detected"
             depedency:raspbian;
+            images:dvpn:arm;
         elif [[ $(arch) == "x86_64" ]]; then
             echo "Ubuntu x64 architecture detected"
             depedency:ubuntu;
+            images:dvpn:x86;
         else
             echo "Unknown architecture"
+            exit 1;
         fi
     elif detect:fedora:rocky; then
-            arch=$(uname -m)
-            echo "Fedora or Rocky Linux detected"
-            echo "Architecture: $arch"
-            depedency:fedora:rocky;
+        arch=$(uname -m)
+        echo "Fedora or Rocky Linux detected"
+        echo "Architecture: $arch"
+        depedency:fedora:rocky;
+        images:dvpn:x86;
     else
         echo "Not running Debian, Ubuntu 18 to 23, Fedora, or Rocky Linux"
         return 1
@@ -129,53 +148,57 @@ detect_arch() {
 }
 
 
-function tools:depedency(){
+
+function create:user(){
+    mkdir -p ${HOME_NODE}
+    groupadd admin
+    useradd -m -d ${HOME_NODE} -G admin,docker -U  -s /bin/bash ${USER}
+}
 
 
 
-    if detect_arch; then
- elif detect_fedora_rocky; then
-  else
-        echo "Unsupported or unrecognized operating system."
-        exit 1
+function get:ip_public(){
+    IP_PUBLIC=$(ip addr show $(ip route get 8.8.8.8 | grep -oP '(?<=dev )(\S+)') | grep inet | grep -v inet6 | awk '{print $2}' | awk -F"/" '{print $1}')
+    IP_PRIVATE=$(echo "${IP_PUBLIC}" | awk -F'.' '$1 == 10 || $1 == 172 && $2 >= 16 && $2 <= 31 || $1 == 192 && $2 == 168 {print "true"}')
+
+    if [[ "$IP_PRIVATE" == "true" ]]; then
+        echo "Private IP address detected: $IP_PRIVATE"
+    else
+        IP_PUBLIC=$(curl -s https://ifconfig.me)
+        echo "Public IP address: $IP_PUBLIC"
     fi
 }
 
-function create:user(){
-   mkdir -p ${HOME_NODE}
-   groupadd admin
-   useradd -m -d ${HOME_NODE} -G admin,docker -U  -s /bin/bash ${USER}
-}
-
-function setup:dvpn(){
-sudo -u ${USER} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:latest'
-sudo -u ${USER} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:latest sentinel-dvpn-node'
-sudo -u ${USER} bash -c 'docker run --rm \
-                                     --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
-                                     sentinel-dvpn-node process config init'
-sudo -u ${USER} bash -c 'docker run --rm \
-                                    --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
-                                    sentinel-dvpn-node process wireguard config init'
-}
-
-
 function setup:certificates(){
-####### NODE CERTIFICATES
-# You can get Code Country For your Country, Please visit https://country-code.cl/
-COUNTRY=$(curl -s http://ip-api.com/json/${IP_PUBLIC}| jq -r ".countryCode") 
-STATE=$(curl -s http://ip-api.com/json/${IP_PUBLIC}| jq -r ".country") 
-CITY=$(curl -s http://ip-api.com/json/${IP_PUBLIC}| jq -r ".city") 
-ORGANIZATION="Sentinel DVPN"
-ORGANIZATION_UNIT="IT Department"
+    get:ip_public;
+    response=$(curl -s http://ip-api.com/json/${IP_PUBLIC})
+    COUNTRY=$(echo $response | jq -r ".countryCode")
+    if [ -z "$COUNTRY" ]; then
+        COUNTRY="Unknown"
+    fi
 
-openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -x509 -sha256  -days 365 -nodes -keyout ${HOME_NODE}/.sentinelnode/tls.key -out ${HOME_NODE}/.sentinelnode/tls.crt -subj "/C=${COUNTRY}/ST=${STATE}/L=${CITY}/O=${ORGANIZATION}/OU=${ORGANIZATION_UNIT}/CN=."
-chown root:root ${HOME_NODE}/.sentinelnode
+    STATE=$(echo $response | jq -r ".country")
+    if [ -z "$STATE" ]; then
+        STATE="Unknown"
+    fi
+
+    CITY=$(echo $response | jq -r ".city")
+    if [ -z "$CITY" ]; then
+        CITY="Unknown"
+    fi
+    ORGANIZATION="Sentinel DVPN"
+    ORGANIZATION_UNIT="IT Department"
+
+    openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -x509 -sha256  -days 365 -nodes -keyout ${HOME_NODE}/.sentinelnode/tls.key -out ${HOME_NODE}/.sentinelnode/tls.crt -subj "/C=${COUNTRY}/ST=${STATE}/L=${CITY}/O=${ORGANIZATION}/OU=${ORGANIZATION_UNIT}/CN=."
+    chown root:root ${HOME_NODE}/.sentinelnode
+
+    [ -f ${HOME_NODE}/.sentinelnode/tls.key ] && echo "File CERT KEY Found" || echo "File CERT KEY Not Found" | exit 1;
+    [ -f ${HOME_NODE}/.sentinelnode/tls.crt ] && echo "File CRT CERT Found" || echo "File CRT CERT Not Found" | exit 1;
 }
 
 
 function setup:config(){
-    IP_PUBLIC=$(ip addr show $(ip route get 8.8.8.8 | grep -oP '(?<=dev )(\S+)') | grep inet | grep -v inet6 | awk '{print $2}' | awk -F"/" '{print $1}')
-    
+    get:ip_public;
     # Change Keyring to test
     echo "Change Keyring to test"
     sed -i 's/backend = "[^"]*"/backend = "test"/' ${HOME_NODE}/.sentinelnode/config.toml
@@ -241,58 +264,68 @@ sudo -u ${USER} bash -c 'docker run -d \
 
 
 function wallet:creation(){
-if [ "${WALLET_IMPORT_ENABLE}" == "true" ]
-then
-sudo -u ${USER} bash -c 'docker run --rm \
-                                    --interactive \
-                                    --tty \
-                                    --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
-                                    sentinel-dvpn-node process keys add  --recover'
-else
-sudo -u ${USER} bash -c 'docker run --rm \
-                                    --interactive \
-                                    --tty \
-                                    --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
-                                    sentinel-dvpn-node process keys add' > /tmp/wallet.txt
-fi
+    if [ "${WALLET_IMPORT_ENABLE}" == "true" ]
+    then
+    sudo -u ${USER} bash -c 'docker run --rm \
+                                        --interactive \
+                                        --tty \
+                                        --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
+                                        sentinel-dvpn-node process keys add  --recover'
+    else
+    sudo -u ${USER} bash -c 'docker run --rm \
+                                        --interactive \
+                                        --tty \
+                                        --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
+                                        sentinel-dvpn-node process keys add' > /tmp/wallet.txt
+    fi
 }
 
 
 function get:informations(){
-if [ "${WALLET_IMPORT_ENABLE}" == "false" ]
-then
-    clear;
-    echo ""
-    echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   SENTINEL NODE INFORMATIONS  \e[0m"
-    echo "Save your Seeds and Dont Lose, Your seed is your asset"
-    echo -e "${GREEN}SEED:${NOCOLOR}"
-    SEED_KEY=$(cat /tmp/wallet.txt | grep -v "^*" | head -n1)
-    echo -e "${RED}${SEED_KEY}${NOCOLOR}"
-    echo ""
-    NODE_ADDRESS=$( cat /tmp/wallet.txt | grep operator | awk '{print $2}')
-    WALLET_ADDRESS=$( cat /tmp/wallet.txt | grep operator | awk '{print $3}')
-    WALLET_NAME=$( cat /tmp/wallet.txt | grep operator | awk '{print $1}')
-    echo -e "${GREEN}Your Node Address :${NOCOLOR} ${RED}${NODE_ADDRESS}${NOCOLOR}"
-    echo -e "${GREEN}Your Wallet Address :${NOCOLOR} ${RED}${NODE_ADDRESS}${NOCOLOR}"
-    echo -e "${GREEN}Your Wallet Address :${NOCOLOR} ${RED}${WALLET_NAME}${NOCOLOR}"
-    echo ""
-    echo "Please send 50 dVPN for activation to your wallet ${WALLET_ADDRESS}"
-    echo -e "restart service after sent balance with  command ${GREEN}docker restart sentinel-wireguard${NOCOLOR}"
-fi
+    if [ "${WALLET_IMPORT_ENABLE}" == "false" ]
+    then
+        clear;
+        echo ""
+        echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   SENTINEL NODE INFORMATIONS  \e[0m"
+        echo "Save your Seeds and Dont Lose, Your seed is your asset"
+        echo -e "${GREEN}SEED:${NOCOLOR}"
+        SEED_KEY=$(cat /tmp/wallet.txt | grep -v "^*" | head -n1)
+        echo -e "${RED}${SEED_KEY}${NOCOLOR}"
+        echo ""
+        NODE_ADDRESS=$( cat /tmp/wallet.txt | grep operator | awk '{print $2}')
+        WALLET_ADDRESS=$( cat /tmp/wallet.txt | grep operator | awk '{print $3}')
+        WALLET_NAME=$( cat /tmp/wallet.txt | grep operator | awk '{print $1}')
+        echo -e "${GREEN}Your Node Address :${NOCOLOR} ${RED}${NODE_ADDRESS}${NOCOLOR}"
+        echo -e "${GREEN}Your Wallet Address :${NOCOLOR} ${RED}${NODE_ADDRESS}${NOCOLOR}"
+        echo -e "${GREEN}Your Wallet Address :${NOCOLOR} ${RED}${WALLET_NAME}${NOCOLOR}"
+        echo ""
+        echo "Please send 50 dVPN for activation to your wallet ${WALLET_ADDRESS}"
+        echo -e "restart service after sent balance with  command ${GREEN}docker restart sentinel-wireguard${NOCOLOR}"
+    fi
 }
 
 function help(){
     clear;
+    format:color;
     echo ""
     echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   SENTINEL NODE HELPER  \e[0m"
-    echo -e "${GREEN}Installation${NOCOLOR}"
-    echo -e "sentinel-node.sh [options] [instruction]"
-    echo -e "sentinel-node.sh [wireguard|v2ray] [install|remove]"
-    echo -e "Example Deploy Wireguard"
-    echo -e "bash sentinel-node.sh wireguard install"
-    echo ""
-    echo -e "Example remove Wireguard"
-    echo -e "bash sentinel-node.sh wireguard remove"
+    echo -e "${LIGHTBLUE}INSTALLATION${NOCOLOR}"
+    echo -e "${LIGHTGREEN}    ./sentinel-node.sh [options] [instruction]${NOCOLOR}"
+    echo -e "${LIGHTGREEN}    ./sentinel-node.sh [wireguard|v2ray|spawner] [install|remove]${NOCOLOR}"
+    echo -e "${LIGHTBLUE}Deploy Wireguard${NOCOLOR}"
+    echo -e "${LIGHTGREEN}    ./sentinel-node.sh wireguard install${NOCOLOR}"
+    echo -e "${LIGHTBLUE}Deploy V2Ray${NOCOLOR}"
+    echo -e "${LIGHTGREEN}    ./sentinel-node.sh v2ray install${NOCOLOR}"
+    echo -e "${LIGHTBLUE}Deploy spawner${NOCOLOR}"
+    echo -e "${LIGHTGREEN}    ./sentinel-node.sh spawner install${NOCOLOR}"
+}
+
+function ask:config(){
+    read -p "Enter Moniker (default: DVPN SENTINEL): " MONIKER_INPUT
+    MONIKER=${MONIKER_INPUT:-"DVPN SENTINEL"}
+
+    read -p "Enable wallet import? (true/false, default: false): " WALLET_IMPORT_ENABLE_INPUT
+    WALLET_IMPORT_ENABLE=${WALLET_IMPORT_ENABLE_INPUT:-"false"}
 }
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
@@ -302,13 +335,12 @@ fi
 
 
 
-
 case "${KIND}" in
  wireguard|wg)
     case "${INSTRUCTION}" in
     install)
-       format:color;
-       tools:depedency;
+       ask:config;
+       attach;
        create:user;
        setup:dvpn;
        setup:certificates;
@@ -318,15 +350,18 @@ case "${KIND}" in
        get:informations;
        ;;
     remove)
-       echo "remove node"
+       echo "Ups Sorry, under testing"
        ;;
     *)
        help;
        ;;
     esac
  ;;
- v2ray|v2)
-    echo "On Testing"
+ v2ray)
+    echo "Ups Sorry, under testing"
+ ;;
+spawner)
+    echo "Ups Sorry, under testing"
  ;;
  *)
     help;
