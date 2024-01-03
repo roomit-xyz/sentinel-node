@@ -9,8 +9,9 @@
 15 GB Disk
 ```
 
-OS Support x86 <=> Ubuntu 20.04 - 23.04 | Rocky Linux 8 - Fedora 38 39
-OS Support ARM <=> RaspBerryPI
+>OS Support x86 <=> Ubuntu 20.04 - 23.04 | Rocky Linux 8 - Fedora 38 39
+
+>OS Support ARM <=> RaspBerryPI
 
 For Temporary Only support *Wireguard and x86_64 Ubuntu 22.04*
 
