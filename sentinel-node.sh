@@ -79,6 +79,7 @@ function depedency:ubuntu(){
          fi
          apt-get update -y
          apt-get install telegraf acl htop wget tcpdump jq python3-pip lsof  bind9-dnsutils telnet unzip docker-compose zsh docker-ce docker-ce-cli containerd.io docker-compose-plugin git ufw -y
+         systemctl start docker
 }
 
 
