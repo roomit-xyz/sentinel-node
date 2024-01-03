@@ -13,7 +13,12 @@
 
 >OS Support ARM <=> RaspBerryPI
 
-For Temporary Only support *Wireguard and x86_64 Ubuntu 22.04*
+For Temporary Only support 
+
+- *Wireguard and x86_64 Ubuntu 22.04*
+- *v2ray and x86_64 Ubuntu 22.04*
+
+1 machine = 2 service Sentinel DVPN
 
 ### INSTALLATION
 
