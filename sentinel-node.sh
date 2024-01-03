@@ -96,6 +96,7 @@ function depedency:raspbian(){
          sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
          sudo apt-get update -y
          sudo apt-get install htop docker-ce docker-ce-cli python3-pip  containerd.io docker-buildx-plugin docker-compose-plugin jq ufw lsof acl telegraf bind9-dnsutils telnet unzip -y
+         systemctl start docker
 }
 
 function depedency:fedora:rocky(){
@@ -103,6 +104,7 @@ function depedency:fedora:rocky(){
          dnf -y install dnf-plugins-core
          dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
          dnf install -y jq telegraf curl docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin firewalld telnet unzip lsof acl
+         systemctl start docker
 }
 
 
