@@ -7,13 +7,17 @@
 # Let's drink coffee and talk about blockchain
 #
 
-######## OS ENVIRONMENT ######
-USER="sentinel"
-HOME_STAGE="/app/mainnet"
-HOME_NODE="${HOME_STAGE}/${USER}"
+
 
 KIND=$1
 INSTRUCTION=$2
+
+
+######## OS ENVIRONMENT ######
+USER_SENTINEL="sentinel-${KIND}"
+HOME_STAGE="/app/mainnet"
+HOME_NODE="${HOME_STAGE}/${USER_SENTINEL}"
+
 
 function format:color(){
     NOCOLOR='\033[0m'
@@ -74,7 +78,7 @@ function depedency:ubuntu(){
             $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
          fi
          apt-get update -y
-         apt-get install telegraf acl htop wget tcpdump jq python3-pip lsof qrencode wireguard-tools bind9-dnsutils telnet unzip docker-compose zsh docker-ce docker-ce-cli containerd.io docker-compose-plugin git ufw -y
+         apt-get install telegraf acl htop wget tcpdump jq python3-pip lsof  bind9-dnsutils telnet unzip docker-compose zsh docker-ce docker-ce-cli containerd.io docker-compose-plugin git ufw -y
 }
 
 
@@ -89,7 +93,8 @@ function depedency:raspbian(){
          "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/raspbian \
          $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
          sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-         sudo apt-get update
+         sudo apt-get update -y
+         sudo apt-get install htop docker-ce docker-ce-cli python3-pip  containerd.io docker-buildx-plugin docker-compose-plugin jq ufw lsof acl telegraf bind9-dnsutils telnet unzip -y
 }
 
 function depedency:fedora:rocky(){
@@ -101,33 +106,32 @@ function depedency:fedora:rocky(){
 
 
 function images:dvpn:x86(){
-    sudo -u ${USER} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:latest'
-    sudo -u ${USER} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:latest sentinel-dvpn-node'
+    sudo -u ${USER_SENTINEL} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:latest'
+    sudo -u ${USER_SENTINEL} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:latest sentinel-dvpn-node'
 }
 
 function images:dvpn:arm(){
-    sudo -u ${USER} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:0.7.0'
-    sudo -u ${USER} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:0.7.0 sentinel-dvpn-node'
+    sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:0.7.0'
+    sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:0.7.0 sentinel-dvpn-node'
 }
 
 function setup:dvpn(){
-    sudo -u ${USER} bash -c 'docker run --rm \
+    sudo -u ${USER_SENTINEL} bash -c 'docker run --rm \
                                         --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
                                         sentinel-dvpn-node process config init'
     [ -f ${HOME_NODE}/.sentinelnode/config.toml ] && echo "File Config Found" || echo "File Config Not Found" | exit 1;
     if [ "${KIND}" == "wireguard" ]
     then
-      sudo -u ${USER} bash -c 'docker run --rm \
+      sudo -u ${USER_SENTINEL} bash -c 'docker run --rm \
                                           --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
                                           sentinel-dvpn-node process wireguard config init'
       [ -f ${HOME_NODE}/.sentinelnode/wireguard.toml ] && echo "File Config Found" || echo "File Config Not Found" | exit 1;
     else
-      sudo -u ${USER} bash -c 'docker run --rm \
+      sudo -u ${USER_SENTINEL} bash -c 'docker run --rm \
                                           --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
                                           sentinel-dvpn-node process v2ray config init'                                  
       [ -f ${HOME_NODE}/.sentinelnode/v2ray.toml ] && echo "File Config Found" || echo "File Config Not Found" | exit 1;
     fi
-    
 }
 
 function attach() {
@@ -162,7 +166,7 @@ function attach() {
 function create:user(){
     mkdir -p ${HOME_NODE}
     groupadd admin
-    useradd -m -d ${HOME_NODE} -G admin,docker -U  -s /bin/bash ${USER}
+    useradd -m -d ${HOME_NODE} -G admin,docker -U  -s /bin/bash ${USER_SENTINEL}
 }
 
 
@@ -227,11 +231,21 @@ function setup:config(){
 
 
     echo "Change API"
-    sed -i 's/listen_on = "[^"]*"/listen_on = "0.0.0.0:7777"/' ${HOME_NODE}/.sentinelnode/config.toml
+    if [ "${KIND}" == "wireguard" ]
+    then
+      sed -i 's/listen_on = "[^"]*"/listen_on = "0.0.0.0:7777"/' ${HOME_NODE}/.sentinelnode/config.toml
+    else
+      sed -i 's/listen_on = "[^"]*"/listen_on = "0.0.0.0:7776"/' ${HOME_NODE}/.sentinelnode/config.toml
+    fi
 
    
     echo "Change Remote URL"
-    sed -i 's/remote_url = "[^"]*"/remote_url = "https:\/\/'"${IP_PUBLIC}"':7777"/' ${HOME_NODE}/.sentinelnode/config.toml
+    if [ "${KIND}" == "wireguard" ]
+    then
+       sed -i 's/remote_url = "[^"]*"/remote_url = "https:\/\/'"${IP_PUBLIC}"':7777"/' ${HOME_NODE}/.sentinelnode/config.toml
+    else
+        sed -i 's/remote_url = "[^"]*"/remote_url = "https:\/\/'"${IP_PUBLIC}"':7776"/' ${HOME_NODE}/.sentinelnode/config.toml
+    fi
 
  
     echo "Set Moniker Node | ${MONIKER}"
@@ -245,17 +259,36 @@ function setup:config(){
     echo "Update RPC"
     sed -i -e 's|^gigabyte_prices *=.*|gigabyte_prices = "52573ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,9204ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1180852ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,122740ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,15342624udvpn"|'  ${HOME_NODE}/.sentinelnode/config.toml 
     
+    echo "Update Kind Service"
+    sed -i 's/type = "[^"]*"/type = "'"${KIND}"'"/' ${HOME_NODE}/.sentinelnode/config.toml
 
-    setfacl -m u:${USER}:rwx -R ${HOME_NODE}/.sentinelnode
+    echo "Update Handshake"
+    if [ "${KIND}" == "wireguard" ]
+    then
+       sed -i 's/enable = [^"]*/enable = true/' ${HOME_NODE}/.sentinelnode/config.toml
+    else
+       sed -i 's/enable = [^"]*/enable = false/' ${HOME_NODE}/.sentinelnode/config.toml
+    fi
+
+    echo "Change Owner"
+    setfacl -m u:${USER_SENTINEL}:rwx -R ${HOME_NODE}/.sentinelnode
 
 }
 
 function run:container(){
-GET_PORT_WIREGUARD=$(cat ${HOME_NODE}/.sentinelnode/wireguard.toml  | grep listen_port | awk -F"=" '{print $2}' | sed "s/ //")
-GET_PORT_V2RAY=$(cat ${HOME_NODE}/.sentinelnode/v2ray.toml  | grep listen_port | awk -F"=" '{print $2}' | sed "s/ //")
+if [ -f ${HOME_NODE}/.sentinelnode/wireguard.toml ]
+then
+   GET_PORT_WIREGUARD=$(cat ${HOME_NODE}/.sentinelnode/wireguard.toml  | grep listen_port | awk -F"=" '{print $2}' | sed "s/ //")
+fi
+
+if [ -f ${HOME_NODE}/.sentinelnode/v2ray.toml ]
+then
+   GET_PORT_V2RAY=$(cat ${HOME_NODE}/.sentinelnode/v2ray.toml  | grep listen_port | awk -F"=" '{print $2}' | sed "s/ //")
+fi
+
 if [ "${KIND}" == "wireguard" ]
 then
-    sudo -u ${USER} bash -c 'docker run -d \
+    sudo -u ${USER_SENTINEL} bash -c 'docker run -d \
         --name sentinel-wireguard \
         --restart unless-stopped \
         --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
@@ -274,10 +307,11 @@ then
         sentinel-dvpn-node process start'
 elif [ "${KIND}" == "v2ray" ]
 then
-    sudo -u ${USER} bash -c 'docker run -d \
+    sudo -u ${USER_SENTINEL} bash -c 'docker run -d \
+        --name sentinel-v2ray \
         --restart unless-stopped \
         --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
-        -publish 7777:7777/tcp \
+        --publish 7777:7777/tcp \
         --publish '${GET_PORT_V2RAY}':'${GET_PORT_V2RAY}'/tcp \
         sentinel-dvpn-node process start'
 else
@@ -289,17 +323,17 @@ fi
 function wallet:creation(){
     if [ "${WALLET_IMPORT_ENABLE}" == "true" ]
     then
-    sudo -u ${USER} bash -c 'docker run --rm \
-                                        --interactive \
-                                        --tty \
-                                        --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
-                                        sentinel-dvpn-node process keys add  --recover'
+        sudo -u ${USER_SENTINEL} bash -c 'docker run --rm \
+                                            --interactive \
+                                            --tty \
+                                            --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
+                                            sentinel-dvpn-node process keys add  --recover'
     else
-    sudo -u ${USER} bash -c 'docker run --rm \
-                                        --interactive \
-                                        --tty \
-                                        --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
-                                        sentinel-dvpn-node process keys add' > /tmp/wallet.txt
+        sudo -u ${USER_SENTINEL} bash -c 'docker run --rm \
+                                            --interactive \
+                                            --tty \
+                                            --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
+                                            sentinel-dvpn-node process keys add' > /tmp/wallet.txt
     fi
 }
 
@@ -307,7 +341,7 @@ function wallet:creation(){
 function get:informations(){
     if [ "${WALLET_IMPORT_ENABLE}" == "false" ] || [ "${WALLET_IMPORT_ENABLE}" == "False" ] || [ "${WALLET_IMPORT_ENABLE}" == "FALSE" ]
     then
-        clear;
+        # clear;
         echo ""
         echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   SENTINEL NODE INFORMATIONS  \e[0m"
         echo "Save your Seeds and Dont Lose, Your seed is your asset"
@@ -328,7 +362,7 @@ function get:informations(){
 }
 
 function help(){
-    clear;
+    # clear;
     format:color;
     echo ""
     echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   SENTINEL NODE HELPER  \e[0m"
@@ -370,8 +404,8 @@ function remove:sentinel(){
        docker rm sentinel-spawner
     fi
     rm -rf ${HOME_NODE}/.sentinelnode
-    userdel ${USER}
-    rm -rf ${HOME_STAGE}/${USER}
+    userdel ${USER_SENTINEL}
+    rm -rf ${HOME_STAGE}/${USER_SENTINEL}
     echo -e "${RED}Remove Sentinel Successfully${NOCOLOR}"
 }
 
@@ -410,7 +444,6 @@ case "${KIND}" in
     esac
  ;;
  v2ray)
-    echo "Ups Sorry, under testing"
     case "${INSTRUCTION}" in
     install)
        deploy;

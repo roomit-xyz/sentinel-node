@@ -17,6 +17,15 @@ For Temporary Only support *Wireguard and x86_64 Ubuntu 22.04*
 
 ### INSTALLATION
 
+Clone Repository
+
+```
+git clone git@github.com:roomit-xyz/sentinel-node.git
+cd sentinel-node
+sudo su -
+```
+
+Execute
 ```
 INSTALLATION
     ./sentinel-node.sh [options] [instruction]
