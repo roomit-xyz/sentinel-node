@@ -355,7 +355,6 @@ function get:informations(){
         WALLET_ADDRESS=$( cat /tmp/wallet.txt | grep operator | awk '{print $3}')
         WALLET_NAME=$( cat /tmp/wallet.txt | grep operator | awk '{print $1}')
         echo -e "${GREEN}Your Node Address   :${NOCOLOR} ${RED}${NODE_ADDRESS}${NOCOLOR}"
-        echo -e "${GREEN}Your Wallet Address :${NOCOLOR} ${RED}${NODE_ADDRESS}${NOCOLOR}"
         echo -e "${GREEN}Your Wallet Address :${NOCOLOR} ${RED}${WALLET_NAME}${NOCOLOR}"
         echo -e "${GREEN}Your User           :${NOCOLOR} ${RED}${USER_SENTINEL}${NOCOLOR}"
         echo -e "${GREEN}Your Config Path    :${NOCOLOR} ${RED}${HOME_NODE}/.sentinel${NOCOLOR}"
