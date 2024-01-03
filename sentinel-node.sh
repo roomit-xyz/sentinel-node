@@ -106,8 +106,8 @@ function depedency:fedora:rocky(){
 
 
 function images:dvpn:x86(){
-    sudo -u ${USER_SENTINEL} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:latest'
-    sudo -u ${USER_SENTINEL} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:latest sentinel-dvpn-node'
+    sudo -u ${USER_SENTINEL} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:v0.7.0'
+    sudo -u ${USER_SENTINEL} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:v0.7.0 sentinel-dvpn-node'
 }
 
 function images:dvpn:arm(){
