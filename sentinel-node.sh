@@ -105,7 +105,7 @@ function depedency:raspbian(){
          $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
          sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
          sudo apt-get update -y
-         sudo apt-get install htop docker-ce docker-ce-cli python3-pip  containerd.io docker-buildx-plugin docker-compose-plugin jq ufw lsof acl telegraf bind9-dnsutils telnet unzip -y
+         sudo apt-get install htop docker-ce docker-ce-cli python3-pip  containerd.io docker-buildx-plugin docker-compose-plugin jq ufw lsof acl telegraf  telnet unzip -y
          systemctl start docker
 }
 
