@@ -37,8 +37,12 @@ INSTALLATION
     ./sentinel-node.sh [wireguard|v2ray|spawner] [install|remove|update]
 Deploy Wireguard
     ./sentinel-node.sh wireguard install
+Update Wireguard
+    ./sentinel-node.sh wireguard update v0.7.1
 Deploy V2Ray
     ./sentinel-node.sh v2ray install
+Update V2Ray
+    ./sentinel-node.sh v2ray update v0.7.1
 Deploy spawner
     ./sentinel-node.sh spawner install
 ```
