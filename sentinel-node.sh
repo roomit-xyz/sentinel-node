@@ -435,7 +435,7 @@ function help(){
     echo -e "${LIGHTBLUE}Deploy Wireguard${NOCOLOR}"
     echo -e "${LIGHTGREEN}    ./sentinel-node.sh wireguard install${NOCOLOR}"
     echo -e "${LIGHTBLUE}Update Wireguard${NOCOLOR}"
-    echo -e "${LIGHTGREEN}    ./sentinel-node.sh wireguard update 0.7.1${NOCOLOR}"
+    echo -e "${LIGHTGREEN}    ./sentinel-node.sh wireguard update v0.7.1${NOCOLOR}"
     echo -e "${LIGHTBLUE}Deploy V2Ray${NOCOLOR}"
     echo -e "${LIGHTGREEN}    ./sentinel-node.sh v2ray install${NOCOLOR}"
     echo -e "${LIGHTBLUE}Deploy spawner${NOCOLOR}"
