@@ -325,7 +325,7 @@ then
     sudo -u ${USER_SENTINEL} bash -c 'docker run -d \
         --name sentinel-wireguard \
         --restart unless-stopped \
-         --security-opt "seccomp='${HOME_NODE}'/default.json" \
+        --security-opt "seccomp='${HOME_NODE}'/default.json" \
         --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
         --volume /lib/modules:/lib/modules \
         --cap-drop ALL \
@@ -361,13 +361,27 @@ then
     fi
 elif [ "${KIND}" == "v2ray" ]
 then
-    sudo -u ${USER_SENTINEL} bash -c 'docker run -d \
+   if [ "${ARCH}" == "arm" ]
+   then
+       wget -c https://gist.githubusercontent.com/roomit-xyz/6f1344adffe54b0e4f20ff14ae0818b7/raw/938368b2474c4a29d2fb61944a89179c10d120a4/default.json -O ${HOME_NODE}/default.json
+       chown ${USER_SENTINEL}:${USER_SENTINEL} ${HOME_NODE}/default.json
+       sudo -u ${USER_SENTINEL} bash -c 'docker run -d \
+        --name sentinel-v2ray \
+        --security-opt "seccomp='${HOME_NODE}'/default.json" \
+        --restart unless-stopped \
+        --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
+        --publish 7776:7776/tcp \
+        --publish '${GET_PORT_V2RAY}':'${GET_PORT_V2RAY}'/tcp \
+        sentinel-dvpn-node process start'
+   else
+       sudo -u ${USER_SENTINEL} bash -c 'docker run -d \
         --name sentinel-v2ray \
         --restart unless-stopped \
         --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
         --publish 7776:7776/tcp \
         --publish '${GET_PORT_V2RAY}':'${GET_PORT_V2RAY}'/tcp \
         sentinel-dvpn-node process start'
+  fi
 else
    echo spawner
 fi
