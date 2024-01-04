@@ -58,6 +58,16 @@ function detect:fedora:rocky() {
     fi
 }
 
+function detect:raspbianpi() {
+   raspbian_check=$(cat /etc/*-release | grep "ID=raspbian" | wc -l)
+   if [ ${raspbian_check} == 1 ]
+   then
+        return 0  
+    else
+        return 1 
+    fi
+}
+
 
 function depedency:ubuntu(){
         apt-get update
@@ -151,6 +161,13 @@ function attach() {
         else
             echo "Unknown architecture"
             exit 1;
+        fi
+    elif detect:raspbianpi; then
+        if [[ $(arch) == "arm"* ]]; then
+            ARCH="arm"
+            echo "Ubuntu Raspberry Pi architecture detected"
+            depedency:raspbian;
+            images:dvpn:arm;
         fi
     elif detect:fedora:rocky; then
         arch=$(uname -m)
