@@ -25,9 +25,9 @@ For Temporary Only support
 Clone Repository
 
 ```
-git clone git@github.com:roomit-xyz/sentinel-node.git
-cd sentinel-node
+wget -c https://raw.githubusercontent.com/roomit-xyz/sentinel-node/main/sentinel-node.sh
 sudo su -
+chmod +x sentinel-node.sh 
 ```
 
 Execute
@@ -42,6 +42,7 @@ Deploy V2Ray
 Deploy spawner
     ./sentinel-node.sh spawner install
 ```
+>> FOR UPDATE, MAKE SURE YOU HAVE MIGRATE FROM USER SENTINEL (OLD SCRIPT) WITH NEW USER SENTINEL-WIREGUARD,
 
 Migration from old script with user sentinel
 ```
@@ -52,4 +53,10 @@ cd /app/mainnet/sentinel-wireguard
 chown root:root -R .sentinelnode
 setfacl -m u:sentinel-wireguard:rw -R .sentinelnode
 usermod -aG docker sentinel-wireguard
+```
+
+After Migrated done, update your version to
+```
+chmod +x sentinel-node.sh 
+./sentinel-node.sh wireguard update v0.7.1
 ```
