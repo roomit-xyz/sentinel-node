@@ -42,3 +42,14 @@ Deploy V2Ray
 Deploy spawner
     ./sentinel-node.sh spawner install
 ```
+
+Migration from old script with user sentinel
+```
+cp -rf /app/mainnet/sentinel/ /app/mainnet/sentinel-wireguard
+useradd -m -d /app/mainnet/sentinel-wireguard -s /bin/zsh sentinel-wireguard
+chown sentinel-wireguard:sentinel-wireguard -R /app/mainnet/sentinel-wireguard
+cd /app/mainnet/sentinel-wireguard
+chown root:root -R .sentinelnode
+setfacl -m u:sentinel-wireguard:rw -R .sentinelnode
+usermod -aG docker sentinel-wireguard
+```
