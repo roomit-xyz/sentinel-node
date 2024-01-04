@@ -306,6 +306,28 @@ fi
 
 if [ "${KIND}" == "wireguard" ]
 then
+    if [ "${ARCH}" == "arm" ]
+    then
+    wget -c https://gist.githubusercontent.com/roomit-xyz/6f1344adffe54b0e4f20ff14ae0818b7/raw/938368b2474c4a29d2fb61944a89179c10d120a4/default.json
+    sudo -u ${USER_SENTINEL} bash -c 'docker run -d \
+        --name sentinel-wireguard \
+        --restart unless-stopped \
+        --security-opt=seccomp=default.json
+        --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
+        --volume /lib/modules:/lib/modules \
+        --cap-drop ALL \
+        --cap-add NET_ADMIN \
+        --cap-add NET_BIND_SERVICE \
+        --cap-add NET_RAW \
+        --cap-add SYS_MODULE \
+        --sysctl net.ipv4.ip_forward=1 \
+        --sysctl net.ipv6.conf.all.disable_ipv6=0 \
+        --sysctl net.ipv6.conf.all.forwarding=1 \
+        --sysctl net.ipv6.conf.default.forwarding=1 \
+        --publish '${GET_PORT_WIREGUARD}':'${GET_PORT_WIREGUARD}'/udp \
+        --publish 7777:7777/tcp \
+        sentinel-dvpn-node process start'
+    else
     sudo -u ${USER_SENTINEL} bash -c 'docker run -d \
         --name sentinel-wireguard \
         --restart unless-stopped \
@@ -323,6 +345,7 @@ then
         --publish '${GET_PORT_WIREGUARD}':'${GET_PORT_WIREGUARD}'/udp \
         --publish 7777:7777/tcp \
         sentinel-dvpn-node process start'
+    fi
 elif [ "${KIND}" == "v2ray" ]
 then
     sudo -u ${USER_SENTINEL} bash -c 'docker run -d \
