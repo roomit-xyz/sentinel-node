@@ -121,8 +121,8 @@ function depedency:fedora:rocky(){
 function images:dvpn:x86(){
     if [ "${INSTRUCTION}" == "update" ]
     then
-       sudo -u ${USER_SENTINEL} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:'${NEW_VERSION}''
-       sudo -u ${USER_SENTINEL} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:'${NEW_VERSION}' sentinel-dvpn-node'
+       sudo -u ${USER_SENTINEL} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:'${VERSION_NEW}''
+       sudo -u ${USER_SENTINEL} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:'${VERSION_NEW}' sentinel-dvpn-node'
     else
        sudo -u ${USER_SENTINEL} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:v0.7.1'
        sudo -u ${USER_SENTINEL} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:v0.7.1 sentinel-dvpn-node'
@@ -132,8 +132,8 @@ function images:dvpn:x86(){
 function images:dvpn:arm(){
     if [ "${INSTRUCTION}" == "update" ]
     then
-       sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:'${NEW_VERSION}''
-       sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:'${NEW_VERSION}' sentinel-dvpn-node'
+       sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:'${VERSION_NEW}''
+       sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:'${VERSION_NEW}' sentinel-dvpn-node'
     else
        sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:0.7.1'
        sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:0.7.1 sentinel-dvpn-node'
@@ -431,9 +431,11 @@ function help(){
     echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   SENTINEL NODE HELPER  \e[0m"
     echo -e "${LIGHTBLUE}INSTALLATION${NOCOLOR}"
     echo -e "${LIGHTGREEN}    ./sentinel-node.sh [options] [instruction]${NOCOLOR}"
-    echo -e "${LIGHTGREEN}    ./sentinel-node.sh [wireguard|v2ray|spawner] [install|remove]${NOCOLOR}"
+    echo -e "${LIGHTGREEN}    ./sentinel-node.sh [wireguard|v2ray|spawner] [install|remove|update]${NOCOLOR}"
     echo -e "${LIGHTBLUE}Deploy Wireguard${NOCOLOR}"
     echo -e "${LIGHTGREEN}    ./sentinel-node.sh wireguard install${NOCOLOR}"
+    echo -e "${LIGHTBLUE}Update Wireguard${NOCOLOR}"
+    echo -e "${LIGHTGREEN}    ./sentinel-node.sh wireguard update 0.7.1${NOCOLOR}"
     echo -e "${LIGHTBLUE}Deploy V2Ray${NOCOLOR}"
     echo -e "${LIGHTGREEN}    ./sentinel-node.sh v2ray install${NOCOLOR}"
     echo -e "${LIGHTBLUE}Deploy spawner${NOCOLOR}"
@@ -472,7 +474,7 @@ function remove:sentinel(){
     echo -e "${RED}Remove Sentinel Successfully${NOCOLOR}"
 }
 
-function remove:sentinel(){
+function update:sentinel(){
      if [ "${KIND}" == "wireguard" ]
     then
        docker stop sentinel-wireguard
