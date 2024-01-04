@@ -135,8 +135,8 @@ function images:dvpn:arm(){
        sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:'${VERSION_NEW}''
        sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:'${VERSION_NEW}' sentinel-dvpn-node'
     else
-       sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:0.7.1'
-       sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:0.7.1 sentinel-dvpn-node'
+       sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:v0.7.1'
+       sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:v0.7.1 sentinel-dvpn-node'
     fi
 }
 
