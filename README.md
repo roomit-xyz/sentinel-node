@@ -34,7 +34,7 @@ Execute
 ```
 INSTALLATION
     ./sentinel-node.sh [options] [instruction]
-    ./sentinel-node.sh [wireguard|v2ray|spawner] [install|remove]
+    ./sentinel-node.sh [wireguard|v2ray|spawner] [install|remove|update]
 Deploy Wireguard
     ./sentinel-node.sh wireguard install
 Deploy V2Ray
