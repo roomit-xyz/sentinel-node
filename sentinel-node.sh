@@ -325,7 +325,7 @@ then
     sudo -u ${USER_SENTINEL} bash -c 'docker run -d \
         --name sentinel-wireguard \
         --restart unless-stopped \
-         --security-opt seccomp='${HOME_NODE}'/default.json \
+         --security-opt "seccomp='${HOME_NODE}'/default.json" \
         --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
         --volume /lib/modules:/lib/modules \
         --cap-drop ALL \
