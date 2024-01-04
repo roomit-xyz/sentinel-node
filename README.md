@@ -44,7 +44,7 @@ Deploy spawner
 ```
 >> FOR UPDATE, MAKE SURE YOU HAVE MIGRATE FROM USER SENTINEL (OLD SCRIPT) WITH NEW USER SENTINEL-WIREGUARD,
 
-Migration from old script with user sentinel
+Migration from old script with user sentinel to user sentinel-wireguard
 ```
 cp -rf /app/mainnet/sentinel/ /app/mainnet/sentinel-wireguard
 useradd -m -d /app/mainnet/sentinel-wireguard -s /bin/zsh sentinel-wireguard
