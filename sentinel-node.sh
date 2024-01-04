@@ -178,7 +178,6 @@ function attach() {
         if [[ $(arch) == "arm"* ]]; then
             ARCH="arm"
             echo "Ubuntu Raspberry Pi architecture detected"
-            wget -c https://gist.githubusercontent.com/roomit-xyz/6f1344adffe54b0e4f20ff14ae0818b7/raw/938368b2474c4a29d2fb61944a89179c10d120a4/default.json
             depedency:raspbian;
             images:dvpn:arm;
         fi
@@ -321,6 +320,8 @@ if [ "${KIND}" == "wireguard" ]
 then
     if [ "${ARCH}" == "arm" ]
     then
+    wget -c https://gist.githubusercontent.com/roomit-xyz/6f1344adffe54b0e4f20ff14ae0818b7/raw/938368b2474c4a29d2fb61944a89179c10d120a4/default.json -O ${HOME_NODE}/default.json
+    chown ${USER_SENTINEL}:${USER_SENTINEL} ${HOME_NODE}/default.json
     sudo -u ${USER_SENTINEL} bash -c 'docker run -d \
         --name sentinel-wireguard \
         --restart unless-stopped \
