@@ -545,6 +545,15 @@ case "${KIND}" in
     remove)
        remove:sentinel;
        ;;
+    update)
+       VERSION_NEW=$3
+       if [ -z ${VERSION_NEW} ]
+       then
+          echo "Please Provide new version example v0.7.1 or 0.7.1"
+          exit 1
+       fi
+       update:sentinel;
+       ;;
     *)
        help;
        ;;
