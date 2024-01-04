@@ -119,13 +119,25 @@ function depedency:fedora:rocky(){
 
 
 function images:dvpn:x86(){
-    sudo -u ${USER_SENTINEL} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:v0.7.1'
-    sudo -u ${USER_SENTINEL} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:v0.7.1 sentinel-dvpn-node'
+    if [ "${INSTRUCTION}" == "update" ]
+    then
+       sudo -u ${USER_SENTINEL} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:'${NEW_VERSION}''
+       sudo -u ${USER_SENTINEL} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:'${NEW_VERSION}' sentinel-dvpn-node'
+    else
+       sudo -u ${USER_SENTINEL} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:v0.7.1'
+       sudo -u ${USER_SENTINEL} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:v0.7.1 sentinel-dvpn-node'
+    fi
 }
 
 function images:dvpn:arm(){
-    sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:0.7.1'
-    sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:0.7.1 sentinel-dvpn-node'
+    if [ "${INSTRUCTION}" == "update" ]
+    then
+       sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:'${NEW_VERSION}''
+       sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:'${NEW_VERSION}' sentinel-dvpn-node'
+    else
+       sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:0.7.1'
+       sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:0.7.1 sentinel-dvpn-node'
+    fi
 }
 
 function setup:dvpn(){
@@ -460,6 +472,25 @@ function remove:sentinel(){
     echo -e "${RED}Remove Sentinel Successfully${NOCOLOR}"
 }
 
+function remove:sentinel(){
+     if [ "${KIND}" == "wireguard" ]
+    then
+       docker stop sentinel-wireguard
+       docker rm sentinel-wireguard
+    fi
+    if [ "${KIND}" == "v2ray" ]
+    then
+       docker stop sentinel-v2ray
+       docker rm sentinel-v2ray
+    fi
+    if [ "${KIND}" == "spawner" ]
+    then
+       docker stop sentinel-spawner
+       docker rm sentinel-spawner
+    fi
+    attach;
+    run:container
+}
 
 function deploy(){
        ask:config;
@@ -488,6 +519,15 @@ case "${KIND}" in
        ;;
     remove)
        remove:sentinel;
+       ;;
+    update)
+       VERSION_NEW=$3
+       if [ -z ${VERSION_NEW} ]
+       then
+          echo "Please Provide new version example v0.7.1 or 0.7.1"
+          exit 1
+       fi
+       update:sentinel;
        ;;
     *)
        help;
