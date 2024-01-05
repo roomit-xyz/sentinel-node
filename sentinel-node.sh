@@ -221,8 +221,8 @@ function attach() {
 
 function create:user(){
     mkdir -p ${HOME_NODE}
-    groupadd admin
-    useradd -m -d ${HOME_NODE} -G sudo,docker -U  -s /bin/bash ${USER_SENTINEL}
+    groupadd admin && groupadd docker
+    useradd -m -d ${HOME_NODE} -G admin,sudo,docker -U  -s /bin/bash ${USER_SENTINEL}
     usermod -aG docker ${USER_SENTINEL}
 }
 
@@ -538,8 +538,8 @@ function update:sentinel(){
 
 function deploy(){
        ask:config;
-       attach;
        create:user;
+       attach;
        sleep 20;
        setup:dvpn;
        setup:certificates;
