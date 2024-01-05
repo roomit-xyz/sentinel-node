@@ -11,7 +11,7 @@
 
 KIND=$1
 INSTRUCTION=$2
-
+IMAGES_VERSION="v0.7.1"
 
 ######## OS ENVIRONMENT ######
 USER_SENTINEL="sentinel-${KIND}"
@@ -122,10 +122,22 @@ function images:dvpn:x86(){
     if [ "${INSTRUCTION}" == "update" ]
     then
        sudo -u ${USER_SENTINEL} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:'${VERSION_NEW}''
+       check_images=$(docker images | grep "${VERSION_NEW}" | wc -l)
+       if [ ${check_images} == 0 ]
+       then 
+          echo "Images Can not Pulling"
+          exit 1;
+       fi
        sudo -u ${USER_SENTINEL} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:'${VERSION_NEW}' sentinel-dvpn-node'
     else
-       sudo -u ${USER_SENTINEL} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:v0.7.1'
-       sudo -u ${USER_SENTINEL} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:v0.7.1 sentinel-dvpn-node'
+       sudo -u ${USER_SENTINEL} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:'${IMAGES_VERSION}''
+       check_images=$(docker images | grep "dvpn-node:${IMAGES_VERSION}" | wc -l)
+       if [ ${check_images} == 0 ]
+       then 
+          echo "Images Can not Pulling"
+          exit 1;
+       fi
+       sudo -u ${USER_SENTINEL} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:'${IMAGES_VERSION}' sentinel-dvpn-node'
     fi
 }
 
@@ -133,10 +145,22 @@ function images:dvpn:arm(){
     if [ "${INSTRUCTION}" == "update" ]
     then
        sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:'${VERSION_NEW}''
+       check_images=$(docker images | grep "${VERSION_NEW}" | wc -l)
+       if [ ${check_images} == 0 ]
+       then 
+          echo "Images Can not Pulling"
+          exit 1;
+       fi
        sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:'${VERSION_NEW}' sentinel-dvpn-node'
     else
-       sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:v0.7.1'
-       sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:v0.7.1 sentinel-dvpn-node'
+       sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:'${IMAGES_VERSION}''
+       check_images=$(docker images | grep "dvpn-node:${IMAGES_VERSION}" | wc -l)
+       if [ ${check_images} == 0 ]
+       then 
+          echo "Images Can not Pulling"
+          exit 1;
+       fi
+       sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:'${IMAGES_VERSION}' sentinel-dvpn-node'
     fi
 }
 
@@ -450,11 +474,11 @@ function help(){
     echo -e "${LIGHTBLUE}Deploy Wireguard${NOCOLOR}"
     echo -e "${LIGHTGREEN}    ./sentinel-node.sh wireguard install${NOCOLOR}"
     echo -e "${LIGHTBLUE}Update Wireguard${NOCOLOR}"
-    echo -e "${LIGHTGREEN}    ./sentinel-node.sh wireguard update v0.7.1${NOCOLOR}"
+    echo -e "${LIGHTGREEN}    ./sentinel-node.sh wireguard update ${IMAGES_VERSION}${NOCOLOR}"
     echo -e "${LIGHTBLUE}Deploy V2Ray${NOCOLOR}"
     echo -e "${LIGHTGREEN}    ./sentinel-node.sh v2ray install${NOCOLOR}"
     echo -e "${LIGHTBLUE}Update V2Ray${NOCOLOR}"
-    echo -e "${LIGHTGREEN}    ./sentinel-node.sh v2ray update v0.7.1${NOCOLOR}"
+    echo -e "${LIGHTGREEN}    ./sentinel-node.sh v2ray update ${IMAGES_VERSION}${NOCOLOR}"
     echo -e "${LIGHTBLUE}Deploy spawner${NOCOLOR}"
     echo -e "${LIGHTGREEN}    ./sentinel-node.sh spawner install${NOCOLOR}"
 }
@@ -544,7 +568,7 @@ case "${KIND}" in
        VERSION_NEW=$3
        if [ -z ${VERSION_NEW} ]
        then
-          echo "Please Provide new version example v0.7.1 or 0.7.1"
+          echo "Please Provide new version example ${IMAGES_VERSION} or 0.7.1"
           exit 1
        fi
        update:sentinel;
@@ -566,7 +590,7 @@ case "${KIND}" in
        VERSION_NEW=$3
        if [ -z ${VERSION_NEW} ]
        then
-          echo "Please Provide new version example v0.7.1 or 0.7.1"
+          echo "Please Provide new version example 0.7.0 or 0.7.1"
           exit 1
        fi
        update:sentinel;
