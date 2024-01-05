@@ -122,7 +122,7 @@ function images:dvpn:x86(){
     if [ "${INSTRUCTION}" == "update" ]
     then
        sudo -u ${USER_SENTINEL} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:'${VERSION_NEW}''
-       check_images=$(docker images | grep "${VERSION_NEW}" | wc -l)
+        check_images=$(docker images | grep "dvpn-node" | grep "${VERSION_NEW}" | wc -l)
        if [ ${check_images} == 0 ]
        then 
           echo "Images Can not Pulling"
@@ -131,7 +131,7 @@ function images:dvpn:x86(){
        sudo -u ${USER_SENTINEL} bash -c 'docker tag ghcr.io/sentinel-official/dvpn-node:'${VERSION_NEW}' sentinel-dvpn-node'
     else
        sudo -u ${USER_SENTINEL} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:'${IMAGES_VERSION}''
-       check_images=$(docker images | grep "dvpn-node:${IMAGES_VERSION}" | wc -l)
+       check_images=$(docker images | grep "dvpn-node" | grep "${IMAGES_VERSION}" | wc -l)
        if [ ${check_images} == 0 ]
        then 
           echo "Images Can not Pulling"
@@ -145,7 +145,7 @@ function images:dvpn:arm(){
     if [ "${INSTRUCTION}" == "update" ]
     then
        sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:'${VERSION_NEW}''
-       check_images=$(docker images | grep "${VERSION_NEW}" | wc -l)
+       check_images=$(docker images | grep "sentinel-arm" | grep "${VERSION_NEW}" | wc -l)
        if [ ${check_images} == 0 ]
        then 
           echo "Images Can not Pulling"
@@ -154,7 +154,7 @@ function images:dvpn:arm(){
        sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-arm7-debian:'${VERSION_NEW}' sentinel-dvpn-node'
     else
        sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:'${IMAGES_VERSION}''
-       check_images=$(docker images | grep "dvpn-node:${IMAGES_VERSION}" | wc -l)
+       check_images=$(docker images | grep "sentinel-arm" | grep "${IMAGES_VERSION}" | wc -l)
        if [ ${check_images} == 0 ]
        then 
           echo "Images Can not Pulling"
