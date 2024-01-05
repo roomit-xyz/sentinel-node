@@ -222,7 +222,8 @@ function attach() {
 function create:user(){
     mkdir -p ${HOME_NODE}
     groupadd admin
-    useradd -m -d ${HOME_NODE} -G admin,docker -U  -s /bin/bash ${USER_SENTINEL}
+    useradd -m -d ${HOME_NODE} -G sudo,docker -U  -s /bin/bash ${USER_SENTINEL}
+    usermod -aG docker ${USER_SENTINEL}
 }
 
 
