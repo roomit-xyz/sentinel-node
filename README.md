@@ -1,66 +1,83 @@
-# AUTOMATE INSTALL DVPN NODE
+# Installation DVPN
 
+visit : [https://github.com/roomit-xyz/sentinel-node](https://github.com/roomit-xyz/sentinel-node)
 
-### SCOPE
+Last Version | 0.7.1
 
-```
-1 vCPU
-2 GB RAM
-15 GB Disk
-```
+### Support
 
->OS Support x86 <=> Ubuntu 20.04 - 23.04 | Rocky Linux 8 - Fedora 38 39
+<pre><code>Wireguard and V2Ray
+<strong>- Architecure 
+</strong>  🖥️ X86_64
+     - Ubuntu 22.04
+     - Rocky Linux
+     - Fedora Server
 
->OS Support ARM <=> RaspBerryPI
+  💻 ARMv7 
+     - RaspberryPI 4 
+</code></pre>
 
-For Temporary Only support 
+Script can detect Architecure and OS what we used, so with one command we can deploy service dvpn easily.&#x20;
 
-- *Wireguard and x86_64 Ubuntu 22.04*
-- *v2ray and x86_64 Ubuntu 22.04*
+### Installation Node
 
-1 machine able running 2 service Sentinel DVPN (v2ray and wireguard)
-
-### INSTALLATION
-
-Clone Repository
+**How to Install Wireguard**\
+We assume you have a VPS and can login to your VPS and running as root. example for install wireguard service Decentralize VPN Sentinel
 
 ```
 wget -c https://raw.githubusercontent.com/roomit-xyz/sentinel-node/main/sentinel-node.sh
 sudo su -
 chmod +x sentinel-node.sh 
+./sentinel-node.sh wireguard install
 ```
 
-Execute
-```
-INSTALLATION
-    ./sentinel-node.sh [options] [instruction]
-    ./sentinel-node.sh [wireguard|v2ray|spawner] [install|remove|update]
-Deploy Wireguard
-    ./sentinel-node.sh wireguard install
-Update Wireguard
-    ./sentinel-node.sh wireguard update v0.7.1
-Deploy V2Ray
-    ./sentinel-node.sh v2ray install
-Update V2Ray
-    ./sentinel-node.sh v2ray update v0.7.1
-Deploy spawner
-    ./sentinel-node.sh spawner install
-```
->> FOR UPDATE, MAKE SURE YOU HAVE MIGRATE FROM USER SENTINEL (OLD SCRIPT) WITH NEW USER SENTINEL-WIREGUARD,
+Then you will must fill data, following :&#x20;
 
-Migration from old script with user sentinel to user sentinel-wireguard
+* Moniker, Is your name node dvpn.
+* Enable Wallet Import, If you fill with true, the script assumed you have a seed key before and want recovery your node. If youd fill false, the script assumed you have not a seed, then script will be generate new seed key and will show you after installation finished.
+
+**How to install v2ray**
+
+The step downloading same with the wireguard, but for execution we can use
+
 ```
-cp -rf /app/mainnet/sentinel/ /app/mainnet/sentinel-wireguard
-useradd -m -d /app/mainnet/sentinel-wireguard -s /bin/zsh sentinel-wireguard
-chown sentinel-wireguard:sentinel-wireguard -R /app/mainnet/sentinel-wireguard
-cd /app/mainnet/sentinel-wireguard
-chown root:root -R .sentinelnode
-setfacl -m u:sentinel-wireguard:rw -R .sentinelnode
-usermod -aG docker sentinel-wireguard
+./sentinel-node.sh v2ray install
 ```
 
-After Migrated done, update your version to
+### **Update Node**
+
+**How to Upgrade Sentinel DVPN**
+
+Assume existing version 0.7.0 and will upgrade to 0.7.1, you can chek version use api
+
 ```
-chmod +x sentinel-node.sh 
-./sentinel-node.sh wireguard update v0.7.1
+curl https://localhost:7777/status    
+```
+
+Port 7777/tcp is you API Port, just adjust with your Port.
+
+For Update Wireguard
+
+```
+./sentinel-node.sh wireguard update v.0.7.1
+```
+
+For Update v2ray
+
+```
+./sentinel-node.sh v2ray update v.0.7.1
+```
+
+### Remove Node
+
+For Update Wireguard
+
+```
+./sentinel-node.sh wireguard remove 
+```
+
+For Update v2ray
+
+```
+./sentinel-node.sh v2ray remove
 ```
