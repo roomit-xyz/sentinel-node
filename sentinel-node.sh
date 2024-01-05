@@ -540,7 +540,6 @@ function deploy(){
        ask:config;
        create:user;
        attach;
-       sleep 20;
        setup:dvpn;
        setup:certificates;
        setup:config;
