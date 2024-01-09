@@ -83,3 +83,6 @@ For Update v2ray
 ```
 ./sentinel-node.sh v2ray remove
 ```
+
+
+![Demo](sentinel-demo.gif)
