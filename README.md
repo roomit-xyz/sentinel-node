@@ -15,6 +15,7 @@ Last Version | 0.7.1
 
   💻 ARMv7 
      - RaspberryPI 4 Debian
+     
   💻 ARM64/aarch64 
      - Ubuntu
 </code></pre>
