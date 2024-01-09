@@ -14,7 +14,9 @@ Last Version | 0.7.1
      - Fedora Server
 
   💻 ARMv7 
-     - RaspberryPI 4 
+     - RaspberryPI 4 Debian
+  💻 arm64/aarch64 
+     - Ubuntu
 </code></pre>
 
 Script can detect Architecure and OS what we used, so with one command we can deploy service dvpn easily.&#x20;
