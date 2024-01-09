@@ -500,7 +500,7 @@ function get:informations(){
         echo -e "${GREEN}Your EndPoint Node  :${NOCOLOR} ${RED}https://"${IP_PUBLIC}":7777${NOCOLOR}"
         echo -e "${GREEN}Your Port Wireguard :${NOCOLOR} ${RED}${GET_PORT_WIREGUARD}${NOCOLOR}"
         else
-        echo -e "${GREEN}Your EndPoint Node  :${NOCOLOR} ${RED}https://'"${IP_PUBLIC}"':7776${NOCOLOR}"
+        echo -e "${GREEN}Your EndPoint Node  :${NOCOLOR} ${RED}https://"${IP_PUBLIC}":7776${NOCOLOR}"
         echo -e "${GREEN}Your Port Wireguard :${NOCOLOR} ${RED}${GET_PORT_V2RAY}${NOCOLOR}"
         fi
         echo ""
