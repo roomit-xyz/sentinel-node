@@ -93,7 +93,7 @@ function depedency:ubuntu(){
 }
 
 
-function depedency:raspbian(){
+function depedency:raspbian:armv7(){
          apt-get update
          apt-get install ca-certificates curl gnupg
          install -m 0755 -d /etc/apt/keyrings
@@ -107,6 +107,24 @@ function depedency:raspbian(){
          apt-get update -y
          apt-get install htop acl docker-ce docker-ce-cli python3-pip containerd.io docker-buildx-plugin docker-compose-plugin jq ufw lsof acl   telnet unzip -y
          systemctl start docker
+}
+
+function depedency:raspbian:aarch64(){
+        # Add Docker's official GPG key:
+        apt-get update
+        apt-get install ca-certificates curl gnupg
+        install -m 0755 -d /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/debian/gpg |  gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        chmod a+r /etc/apt/keyrings/docker.gpg
+
+        # Add the repository to Apt sources:
+        echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+        tee /etc/apt/sources.list.d/docker.list > /dev/null
+        apt-get update
+        apt-get install telegraf acl htop wget tcpdump jq python3-pip lsof  bind9-dnsutils telnet unzip docker-compose zsh docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin git ufw -y
+        systemctl start docker
 }
 
 function depedency:fedora:rocky(){
@@ -164,6 +182,29 @@ function images:dvpn:arm(){
     fi
 }
 
+function images:dvpn:aarch64(){
+    if [ "${INSTRUCTION}" == "update" ]
+    then
+       sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-aarch64-alpine:'${VERSION_NEW}''
+       check_images=$(docker images | grep "sentinel-aarch" | grep "${VERSION_NEW}" | wc -l)
+       if [ ${check_images} == 0 ]
+       then 
+          echo "Images Can not Pulling"
+          exit 1;
+       fi
+       sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-aarch64-alpine:'${VERSION_NEW}' sentinel-dvpn-node'
+    else
+       sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-aarch64-alpine:'${IMAGES_VERSION}''
+       check_images=$(docker images | grep "sentinel-aarch" | grep "${IMAGES_VERSION}" | wc -l)
+       if [ ${check_images} == 0 ]
+       then 
+          echo "Images Can not Pulling"
+          exit 1;
+       fi
+       sudo -u ${USER_SENTINEL} bash -c 'docker tag wajatmaka/sentinel-aarch64-alpine:'${IMAGES_VERSION}' sentinel-dvpn-node'
+    fi
+}
+
 function setup:dvpn(){
     sudo -u ${USER_SENTINEL} bash -c 'docker run --rm \
                                         --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
@@ -188,12 +229,16 @@ function attach() {
         if [[ $(arch) == "arm"* ]]; then
             ARCH="arm"
             echo "Ubuntu Raspberry Pi architecture detected"
-            depedency:raspbian;
+            depedency:raspbian:armv7;
             images:dvpn:arm;
         elif [[ $(arch) == "x86_64" ]]; then
             echo "Ubuntu x64 architecture detected"
             depedency:ubuntu;
             images:dvpn:x86;
+        elif [[ $(arch) == "aarch64" ]] || [[ $(arch) == "arm64" ]]; then
+            echo "Ubuntu arm64/aarch64 architecture detected"
+            depedency:raspbian:aarch64;
+            images:dvpn:aarch64;
         else
             echo "Unknown architecture"
             exit 1;
@@ -202,7 +247,7 @@ function attach() {
         if [[ $(arch) == "arm"* ]]; then
             ARCH="arm"
             echo "Ubuntu Raspberry Pi architecture detected"
-            depedency:raspbian;
+            depedency:raspbian:armv7;
             images:dvpn:arm;
         fi
     elif detect:fedora:rocky; then
