@@ -492,7 +492,8 @@ function get:informations(){
         WALLET_ADDRESS=$( cat /tmp/wallet.txt | grep operator | awk '{print $3}')
         WALLET_NAME=$( cat /tmp/wallet.txt | grep operator | awk '{print $1}')
         echo -e "${GREEN}Your Node Address   :${NOCOLOR} ${RED}${NODE_ADDRESS}${NOCOLOR}"
-        echo -e "${GREEN}Your Wallet Address :${NOCOLOR} ${RED}${WALLET_NAME}${NOCOLOR}"
+        echo -e "${GREEN}Your Wallet Name    :${NOCOLOR} ${RED}${WALLET_NAME}${NOCOLOR}"
+        echo -e "${GREEN}Your Wallet Address :${NOCOLOR} ${RED}${WALLET_ADDRESS}${NOCOLOR}"
         echo -e "${GREEN}Your User           :${NOCOLOR} ${RED}${USER_SENTINEL}${NOCOLOR}"
         echo -e "${GREEN}Your Config Path    :${NOCOLOR} ${RED}${HOME_NODE}/.sentinel${NOCOLOR}"
         if [ ${KIND} == "wireguard" ]
@@ -583,14 +584,23 @@ function update:sentinel(){
 
 function deploy(){
        ask:config;
+       [ $? != 0 ] && exit 1;
        create:user;
+       [ $? != 0 ] && exit 1;
        attach;
+       [ $? != 0 ] && exit 1;
        setup:dvpn;
+       [ $? != 0 ] && exit 1;
        setup:certificates;
+       [ $? != 0 ] && exit 1;
        setup:config;
+       [ $? != 0 ] && exit 1;
        wallet:creation;
+       [ $? != 0 ] && exit 1;
        run:container;
+       [ $? != 0 ] && exit 1;
        get:informations;
+       [ $? != 0 ] && exit 1;
 }
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
