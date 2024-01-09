@@ -27,8 +27,8 @@ Script can detect Architecure and OS what we used, so with one command we can de
 We assume you have a VPS and can login to your VPS and running as root. example for install wireguard service Decentralize VPN Sentinel
 
 ```
-wget -c https://raw.githubusercontent.com/roomit-xyz/sentinel-node/main/sentinel-node.sh
 sudo su -
+wget -c https://raw.githubusercontent.com/roomit-xyz/sentinel-node/main/sentinel-node.sh
 chmod +x sentinel-node.sh 
 ./sentinel-node.sh wireguard install
 ```
