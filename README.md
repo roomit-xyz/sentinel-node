@@ -73,13 +73,13 @@ For Update v2ray
 
 ### Remove Node
 
-For Update Wireguard
+For Remove Wireguard
 
 ```
 ./sentinel-node.sh wireguard remove 
 ```
 
-For Update v2ray
+For Remove v2ray
 
 ```
 ./sentinel-node.sh v2ray remove
