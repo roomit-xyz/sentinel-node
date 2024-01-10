@@ -659,7 +659,7 @@ fi
 
 
 case "${KIND}" in
- wireguard|wg)
+ wireguard|v2ray)
     case "${INSTRUCTION}" in
     install)
        deploy;
@@ -681,29 +681,7 @@ case "${KIND}" in
        ;;
     esac
  ;;
- v2ray)
-    case "${INSTRUCTION}" in
-    install)
-       deploy;
-       ;;
-    remove)
-       remove:sentinel;
-       ;;
-    update)
-       VERSION_NEW=$3
-       if [ -z ${VERSION_NEW} ]
-       then
-          echo "Please Provide new version example 0.7.0 or 0.7.1"
-          exit 1
-       fi
-       update:sentinel;
-       ;;
-    *)
-       help;
-       ;;
-    esac
- ;;
-spawner)
+ spawner)
     echo "Ups Sorry, under testing"
  ;;
  *)
