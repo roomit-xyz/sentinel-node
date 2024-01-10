@@ -69,7 +69,7 @@ function detect:raspbianpi() {
 }
 
 
-function depedency:ubuntu(){
+function depedency:ubuntu:x86(){
         apt-get update
         apt-get install -y jq telegraf curl ca-certificates curl gnupg  lsb-release -y
         mkdir -p /etc/apt/keyrings
@@ -127,7 +127,7 @@ function depedency:raspbian:aarch64(){
         systemctl start docker
 }
 
-function depedency:fedora:rocky(){
+function depedency:fedora:rocky:x86(){
          echo "Detected Fedora or Rocky Linux. Installing jq and telegraf..."
          dnf -y install dnf-plugins-core
          dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
@@ -159,7 +159,7 @@ function images:dvpn:x86(){
     fi
 }
 
-function images:dvpn:arm(){
+function images:dvpn:armv7(){
     if [ "${INSTRUCTION}" == "update" ]
     then
        sudo -u ${USER_SENTINEL} bash -c 'docker pull wajatmaka/sentinel-arm7-debian:'${VERSION_NEW}''
@@ -224,16 +224,16 @@ function setup:dvpn(){
     fi
 }
 
-function attach() {
+function controller() {
     if detect:ubuntu; then
         if [[ $(arch) == "arm"* ]]; then
             ARCH="arm"
             echo "Ubuntu Raspberry Pi architecture detected"
             depedency:raspbian:armv7;
-            images:dvpn:arm;
+            images:dvpn:armv7;
         elif [[ $(arch) == "x86_64" ]]; then
             echo "Ubuntu x64 architecture detected"
-            depedency:ubuntu;
+            depedency:ubuntu:x86;
             images:dvpn:x86;
         elif [[ $(arch) == "aarch64" ]] || [[ $(arch) == "arm64" ]]; then
             echo "Ubuntu arm64/aarch64 architecture detected"
@@ -248,13 +248,13 @@ function attach() {
             ARCH="arm"
             echo "Ubuntu Raspberry Pi architecture detected"
             depedency:raspbian:armv7;
-            images:dvpn:arm;
+            images:dvpn:armv7;
         fi
     elif detect:fedora:rocky; then
         arch=$(uname -m)
         echo "Fedora or Rocky Linux detected"
         echo "Architecture: $arch"
-        depedency:fedora:rocky;
+        depedency:fedora:rocky:x86;
         images:dvpn:x86;
     else
         echo "Not running Debian, Ubuntu 18 to 23, Fedora, or Rocky Linux"
@@ -578,7 +578,7 @@ function update:sentinel(){
        docker stop sentinel-spawner
        docker rm sentinel-spawner
     fi
-    attach;
+    controller;
     run:container
 }
 
@@ -587,7 +587,7 @@ function deploy(){
        [ $? != 0 ] && exit 1;
        create:user;
        [ $? != 0 ] && exit 1;
-       attach;
+       controller;
        [ $? != 0 ] && exit 1;
        setup:dvpn;
        [ $? != 0 ] && exit 1;
