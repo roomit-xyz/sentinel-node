@@ -507,7 +507,7 @@ fi
 
 
 function wallet:creation(){
-    if [ "${WALLET_IMPORT_ENABLE}" == "true" ]
+    if [ "${WALLET_IMPORT_ENABLE}" == "true" ] || [ "${WALLET_IMPORT_ENABLE}" == "yes" ] || [ "${WALLET_IMPORT_ENABLE}" == "y" ] || [ "${WALLET_IMPORT_ENABLE}" == "Y" ] || [ "${WALLET_IMPORT_ENABLE}" == "True" ] || [ "${WALLET_IMPORT_ENABLE}" == "Yes" ]
     then
         sudo -u ${USER_SENTINEL} bash -c 'docker run --rm \
                                             --interactive \
