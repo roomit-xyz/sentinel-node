@@ -422,6 +422,16 @@ then
    GET_PORT_V2RAY=$(cat ${HOME_NODE}/.sentinelnode/v2ray.toml  | grep listen_port | awk -F"=" '{print $2}' | sed "s/ //")
 fi
 
+CHECK_PORT=$(ss -tulpn | egrep "7777|7776|${GET_PORT_WIREGUARD}|${GET_PORT_V2RAY}" | wc -l)
+
+if [ ${CHECK_PORT} -ne 0 ]
+then
+   echo "Creating Container Cancelling" 
+   echo "due we have issue about conflicting the ports"
+   echo "please check port existing 7777/tcp|7776/tcp|${GET_PORT_WIREGUARD}/udp|${GET_PORT_V2RAY}/tcp in your server already listened"
+   exit 1
+fi
+
 if [ "${KIND}" == "wireguard" ]
 then
     if [ "${ARCH}" == "arm" ]
