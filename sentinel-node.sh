@@ -415,14 +415,16 @@ function run:container(){
 if [ -f ${HOME_NODE}/.sentinelnode/wireguard.toml ]
 then
    GET_PORT_WIREGUARD=$(cat ${HOME_NODE}/.sentinelnode/wireguard.toml  | grep listen_port | awk -F"=" '{print $2}' | sed "s/ //")
+   CHECK_PORT=$(ss -tulpn | egrep "7777|${GET_PORT_WIREGUARD}" | wc -l)
 fi
 
 if [ -f ${HOME_NODE}/.sentinelnode/v2ray.toml ]
 then
    GET_PORT_V2RAY=$(cat ${HOME_NODE}/.sentinelnode/v2ray.toml  | grep listen_port | awk -F"=" '{print $2}' | sed "s/ //")
+   CHECK_PORT=$(ss -tulpn | egrep "7776|${GET_PORT_V2RAY}" | wc -l)
 fi
 
-CHECK_PORT=$(ss -tulpn | egrep "7777|7776|${GET_PORT_WIREGUARD}|${GET_PORT_V2RAY}" | wc -l)
+
 
 if [ ${CHECK_PORT} -ne 0 ]
 then
