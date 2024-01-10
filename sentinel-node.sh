@@ -108,6 +108,13 @@ function depedency:raspbian:armv7(){
          apt-get install htop acl docker-ce docker-ce-cli python3-pip containerd.io docker-buildx-plugin docker-compose-plugin jq ufw lsof acl   telnet unzip -y
          systemctl start docker
 }
+function depedency:fedora:aarch64(){
+         sudo dnf -y install dnf-plugins-core
+         sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+         sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin jq curl telegraf acl lsof unzip telnet
+         systemctl start docker
+}
+
 
 function depedency:ubuntu:aarch64(){
         # Add Docker's official GPG key:
@@ -240,6 +247,7 @@ function controller() {
             depedency:ubuntu:aarch64;
             images:dvpn:aarch64;
         else
+            echo "Sorry, Our script  support x86_64, armv7, arm64 only for Ubuntu Server"
             echo "Unknown architecture"
             exit 1;
         fi
@@ -249,13 +257,29 @@ function controller() {
             echo "Ubuntu Raspberry Pi architecture detected"
             depedency:raspbian:armv7;
             images:dvpn:armv7;
+        else
+            echo "Sorry, Our script  support armv7 only for RaspberryPI OS 32bit"
+            exit 1;
         fi
     elif detect:fedora:rocky; then
-        arch=$(uname -m)
-        echo "Fedora or Rocky Linux detected"
-        echo "Architecture: $arch"
-        depedency:fedora:rocky:x86;
-        images:dvpn:x86;
+        if [[ $(arch) == "arm"* ]]; then
+            echo "Sorry, Our script not support Fedora Server ARMv7, Please use raspberry PI OS FOr ARMv7"
+            exit 1;
+        elif [[ $(arch) == "x86_64" ]]; then
+            arch=$(uname -m)
+            echo "Fedora or Rocky Linux detected"
+            echo "Architecture: $arch"
+            depedency:fedora:rocky:x86;
+            images:dvpn:x86;
+        elif [[ $(arch) == "aarch64" ]] || [[ $(arch) == "arm64" ]]; then
+            echo "Fedora or Rocky ARM64 amd AARCH64"
+            depedency:fedora:aarch64;
+            images:dvpn:aarch64;
+        else
+            echo "Unknown architecture"
+            echo "Sorry, Our script  support x86_64 and arm64 only for Fedora OS"
+            exit 1;
+        fi
     else
         echo "Not running Debian, Ubuntu 18 to 23, Fedora, or Rocky Linux"
         return 1
