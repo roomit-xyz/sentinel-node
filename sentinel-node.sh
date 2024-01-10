@@ -109,7 +109,7 @@ function depedency:raspbian:armv7(){
          systemctl start docker
 }
 
-function depedency:raspbian:aarch64(){
+function depedency:ubuntu:aarch64(){
         # Add Docker's official GPG key:
         apt-get update 
         apt-get install ca-certificates curl gnupg -y
@@ -237,7 +237,7 @@ function controller() {
             images:dvpn:x86;
         elif [[ $(arch) == "aarch64" ]] || [[ $(arch) == "arm64" ]]; then
             echo "Ubuntu arm64/aarch64 architecture detected"
-            depedency:raspbian:aarch64;
+            depedency:ubuntu:aarch64;
             images:dvpn:aarch64;
         else
             echo "Unknown architecture"
