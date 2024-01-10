@@ -236,15 +236,21 @@ function controller() {
         if [[ $(arch) == "arm"* ]]; then
             ARCH="arm"
             echo "Ubuntu Raspberry Pi architecture detected"
-            depedency:raspbian:armv7;
+            if [ "${INSTRUCTION}" == "install" ]; then
+               depedency:raspbian:armv7;
+            fi
             images:dvpn:armv7;
         elif [[ $(arch) == "x86_64" ]]; then
             echo "Ubuntu x86_64 architecture detected"
-            depedency:ubuntu:x86_64;
+            if [ "${INSTRUCTION}" == "install" ]; then
+               depedency:ubuntu:x86_64;
+            fi
             images:dvpn:x86_64;
         elif [[ $(arch) == "aarch64" ]] || [[ $(arch) == "arm64" ]]; then
             echo "Ubuntu arm64/aarch64 architecture detected"
-            depedency:ubuntu:aarch64;
+            if [ "${INSTRUCTION}" == "install" ]; then
+               depedency:ubuntu:aarch64;
+            fi
             images:dvpn:aarch64;
         else
             echo "Sorry, Our script  support x86_64, armv7, arm64 only for Ubuntu Server"
@@ -255,7 +261,9 @@ function controller() {
         if [[ $(arch) == "arm"* ]]; then
             ARCH="arm"
             echo "Ubuntu Raspberry Pi architecture detected"
-            depedency:raspbian:armv7;
+            if [ "${INSTRUCTION}" == "install" ]; then
+                depedency:raspbian:armv7;
+            fi
             images:dvpn:armv7;
         else
             echo "Sorry, Our script  support armv7 only for RaspberryPI OS 32bit"
@@ -269,11 +277,15 @@ function controller() {
             arch=$(uname -m)
             echo "Fedora or Rocky Linux detected"
             echo "Architecture: $arch"
-            depedency:fedora:rocky:x86_64;
+            if [ "${INSTRUCTION}" == "install" ]; then
+               depedency:fedora:rocky:x86_64;
+            fi
             images:dvpn:x86_64;
         elif [[ $(arch) == "aarch64" ]] || [[ $(arch) == "arm64" ]]; then
             echo "Fedora or Rocky ARM64 amd AARCH64"
-            depedency:fedora:aarch64;
+            if [ "${INSTRUCTION}" == "install" ]; then
+               depedency:fedora:aarch64;
+            fi
             images:dvpn:aarch64;
         else
             echo "Unknown architecture"
