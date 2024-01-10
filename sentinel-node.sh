@@ -69,7 +69,7 @@ function detect:raspbianpi() {
 }
 
 
-function depedency:ubuntu:x86(){
+function depedency:ubuntu:x86_64(){
         apt-get update
         apt-get install -y jq telegraf curl ca-certificates curl gnupg  lsb-release -y
         mkdir -p /etc/apt/keyrings
@@ -134,7 +134,7 @@ function depedency:ubuntu:aarch64(){
         systemctl start docker
 }
 
-function depedency:fedora:rocky:x86(){
+function depedency:fedora:rocky:x86_64(){
          echo "Detected Fedora or Rocky Linux. Installing jq and telegraf..."
          dnf -y install dnf-plugins-core
          dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
@@ -143,7 +143,7 @@ function depedency:fedora:rocky:x86(){
 }
 
 
-function images:dvpn:x86(){
+function images:dvpn:x86_64(){
     if [ "${INSTRUCTION}" == "update" ]
     then
        sudo -u ${USER_SENTINEL} bash -c 'docker pull ghcr.io/sentinel-official/dvpn-node:'${VERSION_NEW}''
@@ -239,9 +239,9 @@ function controller() {
             depedency:raspbian:armv7;
             images:dvpn:armv7;
         elif [[ $(arch) == "x86_64" ]]; then
-            echo "Ubuntu x64 architecture detected"
-            depedency:ubuntu:x86;
-            images:dvpn:x86;
+            echo "Ubuntu x86_64 architecture detected"
+            depedency:ubuntu:x86_64;
+            images:dvpn:x86_64;
         elif [[ $(arch) == "aarch64" ]] || [[ $(arch) == "arm64" ]]; then
             echo "Ubuntu arm64/aarch64 architecture detected"
             depedency:ubuntu:aarch64;
@@ -269,8 +269,8 @@ function controller() {
             arch=$(uname -m)
             echo "Fedora or Rocky Linux detected"
             echo "Architecture: $arch"
-            depedency:fedora:rocky:x86;
-            images:dvpn:x86;
+            depedency:fedora:rocky:x86_64;
+            images:dvpn:x86_64;
         elif [[ $(arch) == "aarch64" ]] || [[ $(arch) == "arm64" ]]; then
             echo "Fedora or Rocky ARM64 amd AARCH64"
             depedency:fedora:aarch64;
