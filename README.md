@@ -51,7 +51,7 @@ The step downloading same with the wireguard, but for execution we can use
 
 **How to Upgrade Sentinel DVPN**
 
-Assume existing version 0.7.0 and will upgrade to 0.7.1, you can chek version use api
+Assume existing version 0.7.0 and will upgrade to 0.7.1, you can check existing version use hit api
 
 ```
 curl https://localhost:7777/status    
