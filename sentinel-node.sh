@@ -302,7 +302,16 @@ function controller() {
 
 function create:user(){
     mkdir -p ${HOME_NODE}
-    groupadd admin && groupadd docker
+    check_admin_group=$(getent group admin | wc -l)
+    if [ ${check_admin_group} == 0 ]
+    then
+        groupadd admin 
+    fi
+    check_docker_group=$(getent group docker | wc -l)
+    if [ ${check_docker_group} == 0 ]
+    then
+        groupadd docker
+    fi
     useradd -m -d ${HOME_NODE} -G admin,sudo,docker  -s /bin/bash ${USER_SENTINEL}
     usermod -aG docker ${USER_SENTINEL}
 }
