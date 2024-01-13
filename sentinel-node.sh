@@ -305,15 +305,15 @@ function create:user(){
     check_admin_group=$(getent group admin | wc -l)
     if [ ${check_admin_group} == 0 ]
     then
-        groupadd admin 
+        groupadd admin  2> /dev/null
     fi
     check_docker_group=$(getent group docker | wc -l)
     if [ ${check_docker_group} == 0 ]
     then
-        groupadd docker
+        groupadd docker 2> /dev/null
     fi
-    useradd -m -d ${HOME_NODE} -G admin,sudo,docker  -s /bin/bash ${USER_SENTINEL}
-    usermod -aG docker ${USER_SENTINEL}
+    useradd -m -d ${HOME_NODE} -G admin,sudo,docker  -s /bin/bash ${USER_SENTINEL} 2> /dev/null
+    usermod -aG docker ${USER_SENTINEL} 2> /dev/null
 }
 
 
