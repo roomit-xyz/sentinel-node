@@ -598,7 +598,6 @@ function get:informations(){
         sudo -u ${USER_SENTINEL} bash -c 'docker run  \
                                             --interactive \
                                             --tty \
-                                            --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
                                             sentinel-dvpn-node process keys list' > /tmp/wallet.txt
        get:informations:messages;
     fi
