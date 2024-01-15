@@ -261,6 +261,14 @@ function setup:dvpn(){
                                           sentinel-dvpn-node process v2ray config init'                                  
       [ -f ${HOME_NODE}/.sentinelnode/v2ray.toml ] && echo "File Config Found" || echo "File Config Not Found" | exit 1;
     fi
+    if [ -d ${HOME_NODE}/.sentinelnode ]
+    then
+      cp -rf ${HOME_NODE}/CERT/tls.key ${HOME_NODE}/.sentinelnode/tls.key 
+      cp -rf ${HOME_NODE}/CERT/tls.crt ${HOME_NODE}/.sentinelnode/tls.crt 
+    else
+      echo "Sentinelnode diractory not found"
+      exit 1;
+    fi
 }
 
 function firewall(){
@@ -405,12 +413,16 @@ function setup:certificates(){
     fi
     ORGANIZATION="Sentinel DVPN"
     ORGANIZATION_UNIT="IT Department"
-
-    openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -x509 -sha256  -days 365 -nodes -keyout ${HOME_NODE}/.sentinelnode/tls.key -out ${HOME_NODE}/.sentinelnode/tls.crt -subj "/C=${COUNTRY}/ST=${STATE}/L=${CITY}/O=${ORGANIZATION}/OU=${ORGANIZATION_UNIT}/CN=."
-    chown root:root ${HOME_NODE}/.sentinelnode
-
-    [ -f ${HOME_NODE}/.sentinelnode/tls.key ] && echo "File CERT KEY Found" || echo "File CERT KEY Not Found" | exit 1;
-    [ -f ${HOME_NODE}/.sentinelnode/tls.crt ] && echo "File CRT CERT Found" || echo "File CRT CERT Not Found" | exit 1;
+    mkdir -p ${HOME_NODE}/CERT
+    openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -x509 -sha256  -days 365 -nodes -keyout ${HOME_NODE}/CERT/tls.key -out ${HOME_NODE}/CERT/tls.crt -subj "/C=${COUNTRY}/ST=${STATE}/L=${CITY}/O=${ORGANIZATION}/OU=${ORGANIZATION_UNIT}/CN=."
+    if [ $? -neq 0 ];then
+      echo "Sorry, Certificate Creation Failed" 
+      exit 1;
+    else
+      chown root:root ${HOME_NODE}/.sentinelnode
+      [ -f ${HOME_NODE}/.sentinelnode/tls.key ] && echo "File CERT KEY Found" || echo "File CERT KEY Not Found" | exit 1;
+      [ -f ${HOME_NODE}/.sentinelnode/tls.crt ] && echo "File CRT CERT Found" || echo "File CRT CERT Not Found" | exit 1;
+    fi
 }
 
 
@@ -721,9 +733,9 @@ function deploy(){
        [ $? != 0 ] && exit 1;
        controller;
        [ $? != 0 ] && exit 1;
-       setup:dvpn;
-       [ $? != 0 ] && exit 1;
        setup:certificates;
+       [ $? != 0 ] && exit 1;
+       setup:dvpn;
        [ $? != 0 ] && exit 1;
        setup:config;
        [ $? != 0 ] && exit 1;
