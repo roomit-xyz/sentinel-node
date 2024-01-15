@@ -168,7 +168,7 @@ function depedency:fedora:rocky:x86_64(){
          dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
          dnf install -y jq telegraf curl docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin firewalld telnet unzip lsof acl
          systemctl start docker
-         for x in `echo "jq docker ufw setfacl telegraf"`
+         for x in `echo "jq docker firewalld setfacl telegraf"`
          do
              check:command "${x}"
          done
