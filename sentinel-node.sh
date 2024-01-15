@@ -233,6 +233,7 @@ function setup:dvpn(){
 
 function controller() {
     if detect:ubuntu; then
+        FIREWALL="ufw"
         if [[ $(arch) == "arm"* ]]; then
             ARCH="arm"
             echo "Ubuntu Raspberry Pi architecture detected"
@@ -258,6 +259,7 @@ function controller() {
             exit 1;
         fi
     elif detect:raspbianpi; then
+        FIREWALL="ufw"
         if [[ $(arch) == "arm"* ]]; then
             ARCH="arm"
             echo "Ubuntu Raspberry Pi architecture detected"
@@ -270,6 +272,7 @@ function controller() {
             exit 1;
         fi
     elif detect:fedora:rocky; then
+        FIREWALL="firewalld"
         if [[ $(arch) == "arm"* ]]; then
             echo "Sorry, Our script not support Fedora Server ARMv7, Please use raspberry PI OS FOr ARMv7"
             exit 1;
@@ -588,6 +591,11 @@ function help(){
 }
 
 function ask:config(){
+    clear;
+    format:color;
+    echo ""
+    echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   FORM REGISTRATION SENTINEL  \e[0m"
+
     read -p "Enter Moniker (default: DVPN SENTINEL): " MONIKER_INPUT
     MONIKER=${MONIKER_INPUT:-"DVPN SENTINEL"}
 
