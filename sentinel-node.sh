@@ -566,10 +566,13 @@ function get:informations(){
         format:color;
         echo ""
         echo -e "\e[106m   \e[49m\e[105m   \e[103m   \e[102m   \e[101m   \e[46m    \e[43m    \e[97m\e[44m\e[1m   SENTINEL NODE INFORMATIONS  \e[0m"
+        if [ "${WALLET_IMPORT_ENABLE}" == "false" ] || [ "${WALLET_IMPORT_ENABLE}" == "False" ] || [ "${WALLET_IMPORT_ENABLE}" == "FALSE" ]
+        then
         echo "Save your Seeds and Dont Lose, Your seed is your asset"
         echo -e "${GREEN}SEED:${NOCOLOR}"
         SEED_KEY=$(cat /tmp/wallet.txt | grep -v "^*" | head -n1)
         echo -e "${RED}${SEED_KEY}${NOCOLOR}"
+        fi
         echo ""
         NODE_ADDRESS=$( cat /tmp/wallet.txt | grep operator | awk '{print $2}')
         WALLET_ADDRESS=$( cat /tmp/wallet.txt | grep operator | awk '{print $3}')
