@@ -68,6 +68,14 @@ function detect:raspbianpi() {
     fi
 }
 
+function check:command() {
+    if command -v "$1" &> /dev/null; then
+       echo "$1 is installed"
+    else
+       echo "$1 is not installed"
+       exit 1
+    fi
+}
 
 function depedency:ubuntu:x86_64(){
         apt-get update
@@ -90,6 +98,12 @@ function depedency:ubuntu:x86_64(){
          apt-get update -y
          apt-get install telegraf acl htop wget tcpdump jq python3-pip lsof  bind9-dnsutils telnet unzip docker-compose zsh docker-ce docker-ce-cli containerd.io docker-compose-plugin git ufw -y
          systemctl start docker
+         echo "Check Tools Depedencies"
+         for x in `echo "jq docker ufw setfacl telegraf"`
+         do
+             check:command "${x}"
+         done
+
 }
 
 
@@ -107,12 +121,22 @@ function depedency:raspbian:armv7(){
          apt-get update -y
          apt-get install htop acl docker-ce docker-ce-cli python3-pip containerd.io docker-buildx-plugin docker-compose-plugin jq ufw lsof acl   telnet unzip -y
          systemctl start docker
+         echo "Check Tools Depedencies"
+         for x in `echo "jq docker ufw setfacl telegraf"`
+         do
+             check:command "${x}"
+         done
 }
 function depedency:fedora:aarch64(){
          sudo dnf -y install dnf-plugins-core
          sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
          sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin jq curl telegraf acl lsof unzip telnet
          systemctl start docker
+         echo "Check Tools Depedencies"
+         for x in `echo "jq docker ufw setfacl telegraf"`
+         do
+             check:command "${x}"
+         done
 }
 
 
@@ -132,6 +156,10 @@ function depedency:ubuntu:aarch64(){
         apt-get update
         apt-get install telegraf acl htop wget tcpdump jq python3-pip lsof  bind9-dnsutils telnet unzip docker-compose zsh docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin git ufw -y
         systemctl start docker
+        for x in `echo "jq docker ufw setfacl telegraf"`
+        do
+             check:command "${x}"
+        done
 }
 
 function depedency:fedora:rocky:x86_64(){
@@ -140,6 +168,10 @@ function depedency:fedora:rocky:x86_64(){
          dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
          dnf install -y jq telegraf curl docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin firewalld telnet unzip lsof acl
          systemctl start docker
+         for x in `echo "jq docker ufw setfacl telegraf"`
+         do
+             check:command "${x}"
+         done
 }
 
 
