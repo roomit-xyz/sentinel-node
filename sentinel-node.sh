@@ -231,6 +231,30 @@ function setup:dvpn(){
     fi
 }
 
+function firewall(){
+
+if [ "${FIREWALL}" == "ufw" ]
+then
+   ufw allow 22/tcp
+   if [ -f ${HOME_NODE}/.sentinelnode/wireguard.toml ]
+   then
+      WIREGUARD_PORT=$(cat ${HOME_NODE}/.sentinelnode/wireguard.toml | grep listen_port | awk -F"=" '{print $2}' | sed "s/ //")
+      ufw allow ${WIREGUARD_PORT}/udp
+      ufw allow 7777/tcp
+   fi 
+   
+   if [ -f ${HOME_NODE}/.sentinelnode/v2ray.toml ]
+   then
+      V2RAY_PORT=$(cat ${HOME_NODE}/.sentinelnode/v2ray.toml | grep listen_port | awk -F"=" '{print $2}' | sed "s/ //")
+      ufw allow ${V2RAYPORT}/udp
+      ufw allow 7776/tcp
+   fi
+else
+  echo "For RPM Based Firewalld still not available"
+fi
+
+}
+
 function controller() {
     if detect:ubuntu; then
         FIREWALL="ufw"
@@ -663,6 +687,8 @@ function deploy(){
        wallet:creation;
        [ $? != 0 ] && exit 1;
        run:container;
+       [ $? != 0 ] && exit 1;
+       firewall;
        [ $? != 0 ] && exit 1;
        get:informations;
        [ $? != 0 ] && exit 1;
