@@ -561,8 +561,7 @@ function wallet:creation(){
 
 
 function get:informations(){
-    if [ "${WALLET_IMPORT_ENABLE}" == "false" ] || [ "${WALLET_IMPORT_ENABLE}" == "False" ] || [ "${WALLET_IMPORT_ENABLE}" == "FALSE" ]
-    then
+    function get:informations:messages(){
         clear;
         format:color;
         echo ""
@@ -591,6 +590,17 @@ function get:informations(){
         echo ""
         echo "Please send 50 dVPN for activation to your wallet ${WALLET_ADDRESS}"
         echo -e "restart service after sent balance with  command ${GREEN}docker restart sentinel-wireguard${NOCOLOR}"
+    }
+    if [ "${WALLET_IMPORT_ENABLE}" == "false" ] || [ "${WALLET_IMPORT_ENABLE}" == "False" ] || [ "${WALLET_IMPORT_ENABLE}" == "FALSE" ]
+    then
+        get:informations:messages;
+    else
+        sudo -u ${USER_SENTINEL} bash -c 'docker run  \
+                                            --interactive \
+                                            --tty \
+                                            --volume '${HOME_NODE}'/.sentinelnode:/root/.sentinelnode \
+                                            sentinel-dvpn-node process keys list' > /tmp/wallet.txt
+       get:informations:messages;
     fi
 }
 
