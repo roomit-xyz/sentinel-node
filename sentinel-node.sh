@@ -416,7 +416,8 @@ function setup:certificates(){
     mkdir -p ${HOME_NODE}/CERT
     openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -x509 -sha256  -days 365 -nodes -keyout ${HOME_NODE}/CERT/tls.key -out ${HOME_NODE}/CERT/tls.crt -subj "/C=${COUNTRY}/ST=${STATE}/L=${CITY}/O=${ORGANIZATION}/OU=${ORGANIZATION_UNIT}/CN=."
     if [ $? -eq 1 ];then
-      echo "Sorry, Certificate Creation Failed, because we can not set COUNTRY = ${COUNTRY}, STATE = ${STATE}, or CITY = ${CITY}" 
+      echo "Sorry, Certificate Creation Failed"
+      echo "Reason : because we can not set COUNTRY = ${COUNTRY}, STATE = ${STATE}, or CITY = ${CITY}" 
       exit 1;
     else
       chown root:root ${HOME_NODE}/.sentinelnode
