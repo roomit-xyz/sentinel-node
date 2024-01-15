@@ -415,7 +415,7 @@ function setup:certificates(){
     ORGANIZATION_UNIT="IT Department"
     mkdir -p ${HOME_NODE}/CERT
     openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -x509 -sha256  -days 365 -nodes -keyout ${HOME_NODE}/CERT/tls.key -out ${HOME_NODE}/CERT/tls.crt -subj "/C=${COUNTRY}/ST=${STATE}/L=${CITY}/O=${ORGANIZATION}/OU=${ORGANIZATION_UNIT}/CN=."
-    if [ $? -neq 0 ];then
+    if [ $? == 1 ];then
       echo "Sorry, Certificate Creation Failed" 
       exit 1;
     else
