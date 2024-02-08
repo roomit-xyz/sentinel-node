@@ -704,15 +704,27 @@ function remove:sentinel(){
 }
 
 function update:sentinel(){
-     if [ "${KIND}" == "wireguard" ]
+    if [ -f ${HOME_NODE}/.sentinelnode/wireguard.toml ]
     then
-       docker stop sentinel-wireguard
-       docker rm sentinel-wireguard
+      if [ "${KIND}" == "wireguard" ]
+      then
+         docker stop sentinel-wireguard
+         docker rm sentinel-wireguard
+      fi
+    else
+      echo "Make sure your eraly installation using our script"
+      exit 1;
     fi
-    if [ "${KIND}" == "v2ray" ]
+    if [ -f ${HOME_NODE}/.sentinelnode/v2ray.toml ]
     then
-       docker stop sentinel-v2ray
-       docker rm sentinel-v2ray
+      if [ "${KIND}" == "v2ray" ]
+      then
+         docker stop sentinel-v2ray
+         docker rm sentinel-v2ray
+      fi
+    else
+      echo "Make sure your eraly installation using our script"
+      exit 1;
     fi
     if [ "${KIND}" == "spawner" ]
     then
