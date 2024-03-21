@@ -139,6 +139,28 @@ function depedency:fedora:aarch64(){
          done
 }
 
+function  depedency:debian:aarch64(){
+   # Add Docker's official GPG key:
+   sudo apt-get update
+   sudo apt-get install ca-certificates curl  
+   sudo install -m 0755 -d /etc/apt/keyrings
+   sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+   sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+    # Add the repository to Apt sources:
+    echo \
+     "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+     $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+     sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+     
+    sudo apt-get update -y 
+    apt-get install telegraf acl htop wget tcpdump jq python3-pip lsof  bind9-dnsutils telnet unzip docker-compose zsh docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin git ufw -y
+    systemctl start docker
+    for x in `echo "jq docker ufw setfacl telegraf"`
+    do
+             check:command "${x}"
+    done
+}
 
 function depedency:ubuntu:aarch64(){
         # Add Docker's official GPG key:
@@ -310,7 +332,7 @@ function controller() {
                depedency:ubuntu:x86_64;
             fi
             images:dvpn:x86_64;
-        elif [[ $(arch) == "aarch64" ]] || [[ $(arch) == "arm64" ]]; then
+        elif [[ $(arch) == "aarch64"* ]] || [[ $(arch) == "arm64"* ]]; then
             echo "Ubuntu arm64/aarch64 architecture detected"
             if [ "${INSTRUCTION}" == "install" ]; then
                depedency:ubuntu:aarch64;
@@ -330,6 +352,12 @@ function controller() {
                 depedency:raspbian:armv7;
             fi
             images:dvpn:armv7;
+        elif [[ $(arch) == "aarch64"* ]] || [[ $(arch) == "arm64"* ]]; then
+            echo "Debian arm64/aarch64 architecture detected"
+            if [ "${INSTRUCTION}" == "install" ]; then
+               depedency:debian:aarch64;
+            fi
+            images:dvpn:aarch64;
         else
             echo "Sorry, Our script  support armv7 only for RaspberryPI OS 32bit"
             exit 1;
