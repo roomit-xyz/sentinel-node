@@ -60,7 +60,8 @@ function detect:fedora:rocky() {
 
 function detect:raspbianpi() {
    raspbian_check=$(cat /etc/*-release | grep "ID=raspbian" | wc -l)
-   if [ ${raspbian_check} == 1 ]
+   arm_check=$(uname -a | egrep "aarch64|arm64|armv7")
+   if [ ${raspbian_check} == 1 ] || [ ${arm_check} == 1 ]
    then
         return 0  
     else
