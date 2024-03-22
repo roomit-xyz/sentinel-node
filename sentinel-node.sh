@@ -155,7 +155,7 @@ function  depedency:debian:aarch64(){
      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
      
     sudo apt-get update -y 
-    apt-get install telegraf acl htop wget tcpdump jq python3-pip lsof  bind9-dnsutils telnet unzip docker-compose zsh docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin git ufw -y
+    apt-get install acl htop wget tcpdump jq python3-pip lsof  bind9-dnsutils telnet unzip docker-compose zsh docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin git ufw -y
     systemctl start docker
     for x in `echo "jq docker ufw setfacl telegraf"`
     do
