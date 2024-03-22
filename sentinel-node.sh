@@ -17,6 +17,7 @@ IMAGES_VERSION="v0.7.1"
 USER_SENTINEL="sentinel-${KIND}"
 HOME_STAGE="/app/mainnet"
 HOME_NODE="${HOME_STAGE}/${USER_SENTINEL}"
+TELEMETRICS=false
 
 
 function format:color(){
@@ -97,10 +98,14 @@ function depedency:ubuntu:x86_64(){
             $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
          fi
          apt-get update -y
-         apt-get install telegraf acl htop wget tcpdump jq python3-pip lsof  bind9-dnsutils telnet unzip docker-compose zsh docker-ce docker-ce-cli containerd.io docker-compose-plugin git ufw -y
+         if [ ${TELEMETRICS} == true ]
+         then
+            apt install telegraf -y
+         fi
+         apt-get install  acl htop wget tcpdump jq python3-pip lsof  bind9-dnsutils telnet unzip docker-compose zsh docker-ce docker-ce-cli containerd.io docker-compose-plugin git ufw -y
          systemctl start docker
          echo "Check Tools Depedencies"
-         for x in `echo "jq docker ufw setfacl telegraf"`
+         for x in `echo "jq docker ufw setfacl"`
          do
              check:command "${x}"
          done
@@ -120,10 +125,14 @@ function depedency:raspbian:armv7(){
          $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
          tee /etc/apt/sources.list.d/docker.list > /dev/null
          apt-get update -y
+         if [ ${TELEMETRICS} == true ]
+         then
+            apt install telegraf -y
+         fi
          apt-get install htop acl docker-ce docker-ce-cli python3-pip containerd.io docker-buildx-plugin docker-compose-plugin jq ufw lsof acl   telnet unzip -y
          systemctl start docker
          echo "Check Tools Depedencies"
-         for x in `echo "jq docker ufw setfacl telegraf"`
+         for x in `echo "jq docker ufw setfacl"`
          do
              check:command "${x}"
          done
@@ -131,10 +140,14 @@ function depedency:raspbian:armv7(){
 function depedency:fedora:aarch64(){
          sudo dnf -y install dnf-plugins-core
          sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
-         sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin jq curl telegraf acl lsof unzip telnet
+         sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin jq curl acl lsof unzip telnet
          systemctl start docker
+         if [ ${TELEMETRICS} == true ]
+         then
+            apt install telegraf -y
+         fi
          echo "Check Tools Depedencies"
-         for x in `echo "jq docker ufw setfacl telegraf"`
+         for x in `echo "jq docker ufw setfacl"`
          do
              check:command "${x}"
          done
@@ -155,9 +168,13 @@ function  depedency:debian:aarch64(){
      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
      
     sudo apt-get update -y 
+    if [ ${TELEMETRICS} == true ]
+    then
+            apt install telegraf -y
+    fi
     apt-get install acl htop wget tcpdump jq python3-pip lsof  bind9-dnsutils telnet unzip docker-compose zsh docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin git ufw -y
     systemctl start docker
-    for x in `echo "jq docker ufw setfacl telegraf"`
+    for x in `echo "jq docker ufw setfacl"`
     do
              check:command "${x}"
     done
@@ -177,9 +194,13 @@ function depedency:ubuntu:aarch64(){
         $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
         tee /etc/apt/sources.list.d/docker.list > /dev/null
         apt-get update
-        apt-get install telegraf acl htop wget tcpdump jq python3-pip lsof  bind9-dnsutils telnet unzip docker-compose zsh docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin git ufw -y
+        if [ ${TELEMETRICS} == true ]
+        then
+            apt install telegraf -y
+        fi
+        apt-get install  acl htop wget tcpdump jq python3-pip lsof  bind9-dnsutils telnet unzip docker-compose zsh docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin git ufw -y
         systemctl start docker
-        for x in `echo "jq docker ufw setfacl telegraf"`
+        for x in `echo "jq docker ufw setfacl"`
         do
              check:command "${x}"
         done
@@ -189,9 +210,13 @@ function depedency:fedora:rocky:x86_64(){
          echo "Detected Fedora or Rocky Linux. Installing jq and telegraf..."
          dnf -y install dnf-plugins-core
          dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
-         dnf install -y jq telegraf curl docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin firewalld telnet unzip lsof acl
+         if [ ${TELEMETRICS} == true ]
+         then
+            dnf install telegraf -y
+         fi
+         dnf install -y jq curl docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin firewalld telnet unzip lsof acl
          systemctl start docker
-         for x in `echo "jq docker firewalld setfacl telegraf"`
+         for x in `echo "jq docker firewalld setfacl"`
          do
              check:command "${x}"
          done
