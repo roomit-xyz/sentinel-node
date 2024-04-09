@@ -489,7 +489,7 @@ function setup:config(){
 
   
     echo "Change RPC"
-    sed -i 's/rpc_addresses = "[^"]*"/rpc_addresses = "https:\/\/rpc.dvpn.roomit.xyz:443"/' ${HOME_NODE}/.sentinelnode/config.toml
+    sed -i 's/rpc_addresses = "[^"]*"/rpc_addresses = "https:\/\/rpc.dvpn.roomit.xyz:443","https/\/rpc.sentinel.chaintools.tech:443","https:\/\/rpc-sentinel.whispernode.com:443","https://rpc.sentinel.quokkastake.io:443"' ${HOME_NODE}/.sentinelnode/config.toml
 
  
     echo "Change RPC Timeout"
